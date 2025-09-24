@@ -29,6 +29,7 @@ import {
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
+  Warning as WarningIcon,
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
@@ -55,6 +56,10 @@ interface Participant {
   userId?: string;
   createdAt: string;
   updatedAt: string;
+  // Warning system fields
+  warningStatus?: 'WARNING_90' | 'WARNING_80' | null;
+  warningPeriodsLeft?: number;
+  lastCompletionPercentage?: number;
 }
 
 interface CreateParticipantDto {
@@ -215,39 +220,62 @@ const Participants: React.FC = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <StyledTableCell>Имя</StyledTableCell>
-                  <StyledTableCell>Грейд</StyledTableCell>
-                  <StyledTableCell align="right">Выручка</StyledTableCell>
-                  <StyledTableCell>Телефон</StyledTableCell>
-                  <StyledTableCell>Telegram</StyledTableCell>
-                  <StyledTableCell>Статус</StyledTableCell>
-                  <StyledTableCell align="center">Действия</StyledTableCell>
+                  <StyledTableCell width="150px">Имя</StyledTableCell>
+                  <StyledTableCell width="240px">Грейд</StyledTableCell>
+                  <StyledTableCell align="right" width="120px">Выручка</StyledTableCell>
+                  <StyledTableCell width="180px">Предупреждения</StyledTableCell>
+                  <StyledTableCell width="100px">Статус</StyledTableCell>
+                  <StyledTableCell width="80px" align="center" sx={{ position: 'sticky', right: 0, backgroundColor: 'inherit', zIndex: 1 }}>Действия</StyledTableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {participants.map((p) => (
                   <TableRow key={p.id} hover>
-                    <TableCell>{p.firstName} {p.lastName}</TableCell>
+                    <TableCell sx={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {p.firstName} {p.lastName}
+                    </TableCell>
                     <TableCell>
                       {p.grade ? (
-                        <Chip label={p.grade.name} style={{ backgroundColor: p.grade.color, color: 'white' }} />
+                        <Chip 
+                          label={p.grade.name} 
+                          style={{ backgroundColor: p.grade.color, color: 'white' }} 
+                          size="small"
+                        />
                       ) : (
-                        'Не назначен'
+                        <Chip label="Не назначен" size="small" variant="outlined" />
                       )}
                     </TableCell>
                     <TableCell align="right">
                       {new Intl.NumberFormat('ru-RU', { 
                         style: 'currency', 
                         currency: 'RUB',
-                        minimumFractionDigits: 0
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
                       }).format(p.revenue || 0)}
                     </TableCell>
-                    <TableCell>{p.phoneNumber}</TableCell>
-                    <TableCell>@{p.username}</TableCell>
                     <TableCell>
-                      <Chip label={p.isActive ? 'Активный' : 'Неактивный'} color={p.isActive ? 'success' : 'default'} size="small" />
+                      {p.warningStatus ? (
+                        <Tooltip title={`Выполнение плана: ${p.lastCompletionPercentage?.toFixed(1) ?? 'н/д'}%. Осталось ${p.warningPeriodsLeft ?? 0} ${p.warningPeriodsLeft === 1 ? 'период' : 'периода'} до понижения.`}>
+                          <Chip
+                            icon={<WarningIcon />}
+                            label={`${p.warningStatus === 'WARNING_90' ? '90%' : '80%'} • ${p.warningPeriodsLeft ?? 0}`}
+                            color={p.warningStatus === 'WARNING_90' ? 'warning' : 'error'}
+                            size="small"
+                            variant="outlined"
+                          />
+                        </Tooltip>
+                      ) : (
+                        <Chip label="Нет" size="small" variant="outlined" color="default" />
+                      )}
                     </TableCell>
-                    <TableCell align="center">
+                    <TableCell>
+                      <Chip 
+                        label={p.isActive ? 'Активный' : 'Неактивный'} 
+                        color={p.isActive ? 'success' : 'default'} 
+                        size="small" 
+                      />
+                    </TableCell>
+                    <TableCell align="center" sx={{ position: 'sticky', right: 0, backgroundColor: 'inherit', zIndex: 1 }}>
                       <Tooltip title="Редактировать">
                         <IconButton size="small" color="primary" onClick={() => { setEditingParticipant(p); setFormOpen(true); }}>
                           <EditIcon fontSize="small" />

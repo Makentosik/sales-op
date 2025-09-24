@@ -1,4 +1,5 @@
-import { IsString, IsOptional, IsNumber, IsBoolean, IsUUID } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsBoolean, IsUUID, IsEnum } from 'class-validator';
+import { WarningStatus } from '@prisma/client';
 
 export class CreateParticipantDto {
   @IsString()
@@ -68,4 +69,17 @@ export class UpdateParticipantDto {
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;
+
+  // Warning system fields
+  @IsEnum(WarningStatus)
+  @IsOptional()
+  warningStatus?: WarningStatus | null;
+
+  @IsNumber()
+  @IsOptional()
+  warningPeriodsLeft?: number;
+
+  @IsNumber()
+  @IsOptional()
+  lastCompletionPercentage?: number;
 }

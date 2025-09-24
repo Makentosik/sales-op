@@ -12,7 +12,11 @@ import {
   Select,
   MenuItem,
   Chip,
-  Box
+  Box,
+  Divider,
+  Typography,
+  FormControlLabel,
+  Switch
 } from '@mui/material';
 import { participantsAPI } from '../services/participants';
 import { gradesAPI } from '../services/grades';
@@ -35,6 +39,10 @@ interface Participant {
   isActive: boolean;
   gradeId?: string;
   userId?: string;
+  // Warning system fields
+  warningStatus?: 'WARNING_90' | 'WARNING_80' | null;
+  warningPeriodsLeft?: number;
+  lastCompletionPercentage?: number;
 }
 
 interface CreateParticipantDto {
@@ -50,6 +58,10 @@ interface CreateParticipantDto {
 
 interface UpdateParticipantDto extends Partial<CreateParticipantDto> {
   isActive?: boolean;
+  // Warning system fields  
+  warningStatus?: 'WARNING_90' | 'WARNING_80' | null;
+  warningPeriodsLeft?: number;
+  lastCompletionPercentage?: number;
 }
 
 interface ParticipantFormProps {
@@ -67,7 +79,7 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
   participant,
   loading = false,
 }) => {
-  const [formData, setFormData] = useState<CreateParticipantDto>({
+  const [formData, setFormData] = useState<CreateParticipantDto & { warningStatus?: 'WARNING_90' | 'WARNING_80' | null; warningPeriodsLeft?: number; lastCompletionPercentage?: number; }>({
     telegramId: '',
     firstName: '',
     lastName: '',
@@ -75,6 +87,9 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
     phoneNumber: '',
     revenue: 0,
     gradeId: '',
+    warningStatus: null,
+    warningPeriodsLeft: 0,
+    lastCompletionPercentage: 0,
   });
   const [grades, setGrades] = useState<Grade[]>([]);
 
@@ -94,6 +109,9 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
         phoneNumber: participant.phoneNumber || '',
         revenue: participant.revenue || 0,
         gradeId: participant.gradeId || '',
+        warningStatus: participant.warningStatus || null,
+        warningPeriodsLeft: participant.warningPeriodsLeft || 0,
+        lastCompletionPercentage: participant.lastCompletionPercentage || 0,
       });
     } else {
       setFormData({
@@ -104,6 +122,9 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
         phoneNumber: '',
         revenue: 0,
         gradeId: '',
+        warningStatus: null,
+        warningPeriodsLeft: 0,
+        lastCompletionPercentage: 0,
       });
     }
   }, [participant, open]);
@@ -150,11 +171,12 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
                 label="Выручка"
                 name="revenue"
                 type="number"
-                value={formData.revenue}
+                value={Math.round(formData.revenue || 0)}
                 onChange={(e) => setFormData(prev => ({ ...prev, revenue: Number(e.target.value) }))}
                 InputProps={{
                   startAdornment: '₽',
                 }}
+                inputProps={{ step: 1 }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -212,6 +234,68 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
                 onChange={handleChange}
               />
             </Grid>
+            
+            {participant && (
+              <>
+                <Grid item xs={12}>
+                  <Divider sx={{ my: 2 }} />
+                  <Typography variant="h6" gutterBottom color="primary">
+                    🚨 Управление предупреждениями
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary" gutterBottom>
+                    Система предупреждений о последующем понижении грейда
+                  </Typography>
+                </Grid>
+                
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <InputLabel id="warning-status-label">Статус предупреждения</InputLabel>
+                    <Select
+                      labelId="warning-status-label"
+                      name="warningStatus"
+                      value={formData.warningStatus || ''}
+                      onChange={(e) => setFormData(prev => ({ ...prev, warningStatus: e.target.value === '' ? null : e.target.value as any }))}
+                      label="Статус предупреждения"
+                    >
+                      <MenuItem value="">Нет предупреждений</MenuItem>
+                      <MenuItem value="WARNING_90">⚠️ Предупреждение 90%</MenuItem>
+                      <MenuItem value="WARNING_80">🚨 Критическое предупреждение 80%</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Периодов осталось"
+                    name="warningPeriodsLeft"
+                    type="number"
+                    value={formData.warningPeriodsLeft || 0}
+                    onChange={(e) => setFormData(prev => ({ ...prev, warningPeriodsLeft: Number(e.target.value) }))}
+                    disabled={!formData.warningStatus}
+                    helperText="Количество периодов до понижения"
+                    inputProps={{ min: 0, max: 10 }}
+                  />
+                </Grid>
+                
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Процент выполнения плана (последний период)"
+                    name="lastCompletionPercentage"
+                    type="number"
+                    value={Math.round((formData.lastCompletionPercentage || 0) * 10) / 10}
+                    onChange={(e) => setFormData(prev => ({ ...prev, lastCompletionPercentage: Number(e.target.value) }))}
+                    helperText="Последний результат выполнения плана"
+                    InputProps={{
+                      endAdornment: '%',
+                    }}
+                    inputProps={{ min: 0, max: 1000, step: 0.1 }}
+                  />
+                </Grid>
+              </>
+            )}
+            
           </Grid>
         </DialogContent>
         <DialogActions>
