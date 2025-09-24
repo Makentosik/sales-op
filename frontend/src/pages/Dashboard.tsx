@@ -91,34 +91,55 @@ interface User {
   role: string;
 }
 
+// Компонент логотипа (можно легко заменить на изображение)
+const Logo: React.FC = () => {
+  const logoPath = '/logo.png'; // Путь к логотипу
+  const hasLogo = true; // Измените на true, когда добавите логотип
+  
+  if (hasLogo) {
+    return (
+      <img 
+        src={logoPath} 
+        alt="Company Logo" 
+        style={{ 
+          width: 36, 
+          height: 36, 
+          borderRadius: '50%',
+          objectFit: 'cover'
+        }} 
+      />
+    );
+  }
+  
+  // По умолчанию показываем иконку
+  return (
+    <Avatar 
+      sx={{ 
+        width: 36, 
+        height: 36, 
+        bgcolor: '#006657',
+      }}
+    >
+      <MenuRounded sx={{ fontSize: 20 }} />
+    </Avatar>
+  );
+};
+
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [user, setUser] = useState<User | null>(null);
 
-  useEffect(() => {
-    // Получаем данные пользователя из localStorage
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    } else {
-      // Если пользователь не авторизован, перенаправляем на страницу входа
-      navigate('/login');
-    }
-  }, [navigate]);
-
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
+  // Функция для расчета оставшихся дней в месяце
+  const getDaysLeftInMonth = () => {
+    const today = new Date();
+    const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    return lastDayOfMonth.getDate() - today.getDate();
   };
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    navigate('/login');
+  // Функция для форматирования текущего месяца
+  const getCurrentMonthYear = () => {
+    return new Date().toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
   };
 
   // Навигационные карточки
@@ -153,7 +174,7 @@ const Dashboard: React.FC = () => {
       icon: <SettingsRounded />,
       color: '#9b59b6',
       route: '/periods',
-      badge: 'Декабрь 2024'
+      badge: getCurrentMonthYear()
     },
     {
       title: 'Расчет ЗП',
@@ -165,27 +186,58 @@ const Dashboard: React.FC = () => {
     }
   ];
 
+  useEffect(() => {
+    // Получаем данные пользователя из localStorage
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    } else {
+      // Если пользователь не авторизован, перенаправляем на страницу входа
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
+
   return (
     <DashboardContainer>
       <StyledAppBar position="sticky">
         <Toolbar>
-          <IconButton edge="start" color="inherit" sx={{ mr: 2 }}>
-            <MenuRounded />
-          </IconButton>
+          {/* Место для логотипа */}
+          <Box sx={{ display: 'flex', alignItems: 'center', mr: 3 }}>
+            <Box sx={{ mr: 1.5 }}>
+              <Logo />
+            </Box>
+            
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 600,
+                background: 'linear-gradient(135deg, #006657 0%, #008570 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
+              Payment System
+            </Typography>
+          </Box>
           
-          <Typography
-            variant="h6"
-            sx={{
-              flexGrow: 1,
-              fontWeight: 600,
-              background: 'linear-gradient(135deg, #006657 0%, #008570 100%)',
-              backgroundClip: 'text',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}
-          >
-            Payment System
-          </Typography>
+          {/* Пробел для отталкивания правых элементов */}
+          <Box sx={{ flexGrow: 1 }} />
 
           <IconButton color="inherit" sx={{ mr: 1 }}>
             <NotificationsRounded />
@@ -362,10 +414,10 @@ const Dashboard: React.FC = () => {
                   
                   <Box sx={{ mt: 2 }}>
                     <Typography variant="h5" fontWeight={600} color="primary">
-                      Декабрь 2024
+                      {getCurrentMonthYear()}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                      Осталось 15 дней
+                      Осталось {getDaysLeftInMonth()} дней
                     </Typography>
                     
                     <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
