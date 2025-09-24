@@ -1,8 +1,10 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { SalaryCalculatorService } from './salary-calculator.service';
 import { SalaryCalculationResponse, ParticipantSalaryDetailsResponse } from './salary-calculator.types';
+import { Public } from '../auth/public.decorator';
 
 @Controller('salary-calculator')
+@Public()
 export class SalaryCalculatorController {
   constructor(private readonly salaryCalculatorService: SalaryCalculatorService) {}
 

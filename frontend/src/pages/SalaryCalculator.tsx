@@ -130,6 +130,11 @@ const SalaryCalculator: React.FC = () => {
     return `${value.toFixed(1)}%`;
   };
 
+  const formatCommissionPercentage = (value: number) => {
+    // Убираем округление для процента комиссии - показываем точное значение
+    return `${value}%`;
+  };
+
   const getPerformanceColor = (completion: number): string => {
     if (completion >= 120) return '#4caf50';
     if (completion >= 100) return '#2196f3';
@@ -206,7 +211,7 @@ const SalaryCalculator: React.FC = () => {
           <>
             {/* Сводная информация */}
             <Grid container spacing={3} sx={{ mb: 4 }}>
-              <Grid item xs={12} md={3}>
+              <Grid item xs={12} md={4}>
                 <SummaryCard>
                   <CardContent>
                     <Typography color="textSecondary" gutterBottom variant="h6">
@@ -218,7 +223,7 @@ const SalaryCalculator: React.FC = () => {
                   </CardContent>
                 </SummaryCard>
               </Grid>
-              <Grid item xs={12} md={3}>
+              <Grid item xs={12} md={4}>
                 <SummaryCard>
                   <CardContent>
                     <Typography color="textSecondary" gutterBottom variant="h6">
@@ -230,7 +235,7 @@ const SalaryCalculator: React.FC = () => {
                   </CardContent>
                 </SummaryCard>
               </Grid>
-              <Grid item xs={12} md={3}>
+              <Grid item xs={12} md={4}>
                 <SummaryCard>
                   <CardContent>
                     <Typography color="textSecondary" gutterBottom variant="h6">
@@ -238,18 +243,6 @@ const SalaryCalculator: React.FC = () => {
                     </Typography>
                     <Typography variant="h4" component="div" sx={{ color: '#ff9800' }}>
                       {formatCurrency(salaryData.summary.totalFixedSalary)}
-                    </Typography>
-                  </CardContent>
-                </SummaryCard>
-              </Grid>
-              <Grid item xs={12} md={3}>
-                <SummaryCard>
-                  <CardContent>
-                    <Typography color="textSecondary" gutterBottom variant="h6">
-                      🎁 Бонусы
-                    </Typography>
-                    <Typography variant="h4" component="div" sx={{ color: '#4caf50' }}>
-                      {formatCurrency(salaryData.summary.totalBonus)}
                     </Typography>
                   </CardContent>
                 </SummaryCard>
@@ -271,7 +264,6 @@ const SalaryCalculator: React.FC = () => {
                       <StyledTableCell align="right">Комиссия</StyledTableCell>
                       <StyledTableCell>Грейд оклада</StyledTableCell>
                       <StyledTableCell align="right">Оклад</StyledTableCell>
-                      <StyledTableCell align="right">Бонус</StyledTableCell>
                       <StyledTableCell align="right">Итого ЗП</StyledTableCell>
                       <StyledTableCell align="center">Действия</StyledTableCell>
                     </TableRow>
@@ -307,7 +299,7 @@ const SalaryCalculator: React.FC = () => {
                           </Typography>
                         </TableCell>
                         <TableCell align="right">
-                          <strong>{formatPercentage(calc.commissionRate)}</strong>
+                          <strong>{formatCommissionPercentage(calc.commissionRate)}</strong>
                         </TableCell>
                         <TableCell align="right" sx={{ color: '#2196f3', fontWeight: 600 }}>
                           {formatCurrency(calc.commission)}
@@ -319,9 +311,6 @@ const SalaryCalculator: React.FC = () => {
                         </TableCell>
                         <TableCell align="right" sx={{ color: '#ff9800', fontWeight: 600 }}>
                           {formatCurrency(calc.fixedSalary)}
-                        </TableCell>
-                        <TableCell align="right" sx={{ color: '#4caf50', fontWeight: 600 }}>
-                          {formatCurrency(calc.bonus)}
                         </TableCell>
                         <TableCell align="right">
                           <Typography variant="h6" sx={{ color: '#006657', fontWeight: 700 }}>
@@ -372,7 +361,6 @@ const SalaryCalculator: React.FC = () => {
                       <TableCell>Диапазон выполнения</TableCell>
                       <TableCell align="right">% комиссии</TableCell>
                       <TableCell align="right">Оклад</TableCell>
-                      <TableCell align="right">Бонус</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -391,7 +379,6 @@ const SalaryCalculator: React.FC = () => {
                         </TableCell>
                         <TableCell align="right">{level.commissionRate}%</TableCell>
                         <TableCell align="right">{formatCurrency(level.fixedSalary)}</TableCell>
-                        <TableCell align="right">{formatCurrency(level.bonusAmount || 0)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

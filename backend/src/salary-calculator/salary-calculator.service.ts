@@ -106,26 +106,28 @@ export class SalaryCalculatorService {
       };
     }
 
-    // Рассчитываем процент выполнения плана
+    // Рассчитываем процент выполнения плана текущего грейда
     const planCompletion = (revenue / currentGrade.plan) * 100;
 
-    // Получаем уровни производительности из грейда
+    // Получаем уровни производительности из текущего грейда
     const performanceLevels = this.parsePerformanceLevels(currentGrade.performanceLevels);
 
     // Находим подходящий уровень производительности
     const performanceLevel = this.findPerformanceLevel(planCompletion, performanceLevels);
 
-    // Рассчитываем комиссию от выручки
+    // Рассчитываем комиссию от выручки по процентам текущего грейда
     const commission = (revenue * performanceLevel.commissionRate) / 100;
 
-    // Определяем грейд для оклада на основе выручки
+    // Определяем грейд для оклада на основе выручки (какой грейд заслуживает по результату)
     const salaryGrade = this.findGradeByRevenue(revenue, allGrades);
+    
+    // Получаем оклад и название грейда по выручке
     const fixedSalaryData = salaryGrade 
-      ? this.getFixedSalaryForGrade(salaryGrade)
+      ? this.getFixedSalaryForGrade(salaryGrade, revenue)
       : { fixedSalary: performanceLevel.fixedSalary, gradeName: currentGrade.name };
 
-    // Бонус (если есть)
-    const bonus = performanceLevel.bonusAmount || 0;
+    // Бонус отключен
+    const bonus = 0;
 
     return {
       participantId: participant.id,
@@ -136,11 +138,11 @@ export class SalaryCalculatorService {
       planCompletion,
       commissionRate: performanceLevel.commissionRate,
       commission,
-      fixedSalary: fixedSalaryData.fixedSalary,
-      fixedSalaryGrade: fixedSalaryData.gradeName,
+      fixedSalary: fixedSalaryData.fixedSalary, // Оклад по грейду заслуженному выручкой
+      fixedSalaryGrade: fixedSalaryData.gradeName, // Название грейда по выручке
       bonus,
-      totalSalary: commission + fixedSalaryData.fixedSalary + bonus,
-      performanceLevel: `${performanceLevel.minPercentage}%-${performanceLevel.maxPercentage}%`,
+      totalSalary: commission + fixedSalaryData.fixedSalary,
+      performanceLevel: `${performanceLevel.minPercentage}%`, // Достигнутый уровень грейда
     };
   }
 
@@ -152,14 +154,57 @@ export class SalaryCalculatorService {
       return this.getDefaultPerformanceLevels();
     }
 
-    return performanceLevelsJson.map(level => ({
-      minPercentage: level.minPercentage || 0,
-      maxPercentage: level.maxPercentage || 100,
-      commissionRate: level.commissionRate || 0,
-      fixedSalary: level.fixedSalary || 0,
-      bonusAmount: level.bonusAmount || 0,
-      description: level.description || '',
-    }));
+    // Преобразуем существующую структуру в новый формат
+    const parsed: GradePerformanceLevel[] = [];
+    
+    for (let i = 0; i < performanceLevelsJson.length; i++) {
+      const level = performanceLevelsJson[i];
+      
+      // Проверяем, если у нас старый формат (с completionPercentage)
+      if (level.completionPercentage !== undefined) {
+        const completionPercentage = level.completionPercentage;
+        // Для первого элемента начинаем с 0, для остальных - с предыдущего уровня
+        const prevCompletion = i === 0 ? 0 : performanceLevelsJson[i - 1].completionPercentage;
+        
+        // Максимальный процент - для последнего элемента до 1000%, для остальных - следующий уровень
+        const maxPercentage = i === performanceLevelsJson.length - 1 ? 1000 : performanceLevelsJson[i + 1].completionPercentage;
+        
+        parsed.push({
+          minPercentage: completionPercentage, // Начинаем с текущего уровня
+          maxPercentage: maxPercentage,
+          commissionRate: level.bonusPercentage || 0,
+          fixedSalary: level.salary || 0,
+          bonusAmount: 0, // Убираем бонусы
+          description: level.description || `${completionPercentage}%-${maxPercentage === 1000 ? '100%+' : maxPercentage + '%'}`,
+        });
+      } else {
+        // Новый формат
+        parsed.push({
+          minPercentage: level.minPercentage || 0,
+          maxPercentage: level.maxPercentage || 100,
+          commissionRate: level.commissionRate || 0,
+          fixedSalary: level.fixedSalary || 0,
+          bonusAmount: 0, // Убираем бонусы
+          description: level.description || '',
+        });
+      }
+    }
+    
+    // Для старого формата добавляем начальный уровень от 0 до первого
+    if (parsed.length > 0 && performanceLevelsJson[0] && performanceLevelsJson[0].completionPercentage !== undefined) {
+      const firstLevel = performanceLevelsJson[0];
+      // Добавляем начальный уровень в начало
+      parsed.unshift({
+        minPercentage: 0,
+        maxPercentage: firstLevel.completionPercentage,
+        commissionRate: 0, // Нулевая комиссия до первого уровня
+        fixedSalary: 20000, // Минимальный оклад
+        bonusAmount: 0,
+        description: `0%-${firstLevel.completionPercentage}%`,
+      });
+    }
+    
+    return parsed;
   }
 
   /**
@@ -181,16 +226,42 @@ export class SalaryCalculatorService {
 
   /**
    * Находит подходящий уровень производительности для процента выполнения
+   * Использует принцип "снизу" - берет максимальный достигнутый уровень
+   * Для менеджеров с низким выполнением (<70%) - дает минимальный уровень грейда
    */
   private findPerformanceLevel(
     completionPercentage: number,
     performanceLevels: GradePerformanceLevel[],
   ): GradePerformanceLevel {
-    const level = performanceLevels.find(
-      level => completionPercentage >= level.minPercentage && completionPercentage < level.maxPercentage,
-    );
+    // Сортируем уровни по возрастанию minPercentage
+    const sortedLevels = [...performanceLevels].sort((a, b) => a.minPercentage - b.minPercentage);
+    
+    // Убираем уровни с minPercentage = 0 (ниже 70%)
+    const validLevels = sortedLevels.filter(level => level.minPercentage > 0);
+    
+    // Если нет валидных уровней, берем первый уровень
+    if (validLevels.length === 0) {
+      return sortedLevels[0] || this.getDefaultPerformanceLevels()[0];
+    }
+    
+    // Если выполнение меньше минимального уровня - даем минимальный
+    const minLevel = validLevels[0];
+    if (completionPercentage < minLevel.minPercentage) {
+      return minLevel;
+    }
+    
+    // Ищем максимальный достигнутый уровень
+    let selectedLevel = minLevel;
+    
+    for (const level of validLevels) {
+      if (completionPercentage >= level.minPercentage) {
+        selectedLevel = level;
+      } else {
+        break;
+      }
+    }
 
-    return level || performanceLevels[0];
+    return selectedLevel;
   }
 
   /**
@@ -212,17 +283,18 @@ export class SalaryCalculatorService {
   }
 
   /**
-   * Получает фиксированный оклад для грейда
+   * Получает фиксированный оклад для грейда на основе выручки и процента выполнения
    */
-  private getFixedSalaryForGrade(grade: Grade): { fixedSalary: number; gradeName: string } {
+  private getFixedSalaryForGrade(grade: Grade, revenue: number = 0): { fixedSalary: number; gradeName: string } {
     const performanceLevels = this.parsePerformanceLevels(grade.performanceLevels);
     
-    // Берем оклад для 100% выполнения или средний оклад
-    const fullCompletionLevel = performanceLevels.find(
-      level => level.minPercentage <= 100 && level.maxPercentage > 100,
-    );
+    // Рассчитываем процент выполнения плана для данного грейда
+    const planCompletion = grade.plan > 0 ? (revenue / grade.plan) * 100 : 0;
+    
+    // Находим подходящий уровень производительности для этого процента
+    const targetLevel = this.findPerformanceLevel(planCompletion, performanceLevels);
 
-    const fixedSalary = fullCompletionLevel?.fixedSalary || 35000;
+    const fixedSalary = targetLevel?.fixedSalary || 27000; // Дефолтный оклад
 
     return {
       fixedSalary,
