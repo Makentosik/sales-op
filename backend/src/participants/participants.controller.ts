@@ -13,6 +13,7 @@ import {
 import { ParticipantsService } from './participants.service';
 import { CreateParticipantDto, UpdateParticipantDto } from './dto/participant.dto';
 import { ImportParticipantDto, ImportParticipantsDto } from './dto/import-participant.dto';
+import { Public } from '../auth/public.decorator';
 
 @Controller('participants')
 export class ParticipantsController {
@@ -47,6 +48,7 @@ export class ParticipantsController {
   }
 
   @Post('import')
+  @Public()
   async import(@Body(ValidationPipe) data: ImportParticipantsDto | ImportParticipantDto[]) {
     // Поддерживаем оба формата: массив и объект с полем participants
     const participants = Array.isArray(data) ? data : data.participants;

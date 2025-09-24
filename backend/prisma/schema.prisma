@@ -64,14 +64,15 @@ model Grade {
 }
 
 model Period {
-  id        String       @id @default(uuid())
-  name      String
-  startDate DateTime
-  endDate   DateTime
-  type      PeriodType   @default(MONTHLY)
-  status    PeriodStatus @default(PENDING)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  id                   String       @id @default(uuid())
+  name                 String
+  startDate            DateTime
+  endDate              DateTime
+  type                 PeriodType   @default(MONTHLY)
+  status               PeriodStatus @default(PENDING)
+  participantSnapshots Json?        // Снимок данных участников на момент завершения периода
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
 
   grades   PeriodGrade[]
   payments Payment[]
