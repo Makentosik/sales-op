@@ -7,6 +7,7 @@ import Grades from './pages/Grades';
 import Participants from './pages/Participants';
 import Leaderboard from './pages/Leaderboard';
 import Periods from './pages/Periods';
+import SalaryCalculator from './pages/SalaryCalculator';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="/participants" element={<Participants />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/periods" element={<Periods />} />
+          <Route path="/salary-calculator" element={<SalaryCalculator />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
       </Router>

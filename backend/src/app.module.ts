@@ -9,19 +9,19 @@ import { GradesModule } from './grades/grades.module';
 import { ParticipantsModule } from './participants/participants.module';
 import { PeriodsModule } from './periods/periods.module';
 import { GradeTransitionsModule } from './grade-transitions/grade-transitions.module';
+import { SalaryCalculatorModule } from './salary-calculator/salary-calculator.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
+    ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
-    AuthModule,
     UsersModule,
+    AuthModule,
     GradesModule,
     ParticipantsModule,
     PeriodsModule,
     GradeTransitionsModule,
+    SalaryCalculatorModule,
   ],
   controllers: [AppController],
   providers: [AppService],

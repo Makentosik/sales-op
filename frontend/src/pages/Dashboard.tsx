@@ -296,6 +296,19 @@ const Dashboard: React.FC = () => {
                 >
                   Периоды 📅
                 </Button>
+                <Button
+                  variant="contained"
+                  sx={{
+                    backgroundColor: 'white',
+                    color: '#006657',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    },
+                  }}
+                  onClick={() => navigate('/salary-calculator')}
+                >
+                  Расчет зарплаты 💰
+                </Button>
               </Box>
             </WelcomeCard>
 
