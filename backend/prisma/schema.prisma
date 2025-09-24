@@ -1,0 +1,159 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      UserRole @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  participants Participant[]
+}
+
+model Participant {
+  id              String   @id @default(uuid())
+  telegramId      String   @unique
+  username        String?
+  firstName       String
+  lastName        String?
+  phoneNumber     String?
+  revenue         Float    @default(0) // Выручка менеджера
+  isActive        Boolean  @default(true)
+  joinedAt        DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  gradeId String?
+  grade   Grade?  @relation(fields: [gradeId], references: [id])
+
+  payments Payment[]
+  logs     Log[]
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+}
+
+model Grade {
+  id               String   @id @default(uuid())
+  name             String   @unique
+  description      String?
+  plan             Float    // План в рублях
+  minRevenue       Float    // Минимальная выручка для попадания в грейд
+  maxRevenue       Float    // Максимальная выручка для попадания в грейд
+  performanceLevels Json    // Массив подуровней выполнения с выручкой, процентами премии, бонусами и зарплатой
+  color            String   @default("#006657")
+  order            Int      @default(0)
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  participants Participant[]
+  periods      PeriodGrade[]
+}
+
+model Period {
+  id        String       @id @default(uuid())
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  type      PeriodType   @default(MONTHLY)
+  status    PeriodStatus @default(PENDING)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  grades   PeriodGrade[]
+  payments Payment[]
+  logs     Log[]
+}
+
+model PeriodGrade {
+  id        String   @id @default(uuid())
+  periodId  String
+  gradeId   String
+  amount    Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  period Period @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  grade  Grade  @relation(fields: [gradeId], references: [id], onDelete: Cascade)
+
+  @@unique([periodId, gradeId])
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  participantId String
+  periodId      String
+  amount        Float
+  status        PaymentStatus @default(PENDING)
+  paidAt        DateTime?
+  description   String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  participant Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  period      Period      @relation(fields: [periodId], references: [id], onDelete: Cascade)
+
+  @@unique([participantId, periodId])
+}
+
+model Log {
+  id            String   @id @default(uuid())
+  type          LogType
+  message       String
+  details       Json?
+  participantId String?
+  periodId      String?
+  createdAt     DateTime @default(now())
+
+  participant Participant? @relation(fields: [participantId], references: [id], onDelete: SetNull)
+  period      Period?      @relation(fields: [periodId], references: [id], onDelete: SetNull)
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum PeriodType {
+  MONTHLY
+  TEN_DAYS
+  CUSTOM
+}
+
+enum PeriodStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  CANCELLED
+  REFUNDED
+}
+
+enum LogType {
+  PAYMENT
+  PARTICIPANT_JOIN
+  PARTICIPANT_LEAVE
+  GRADE_CHANGE
+  PERIOD_START
+  PERIOD_END
+  SYSTEM
+  ERROR
+}

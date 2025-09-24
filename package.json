@@ -1,0 +1,21 @@
+{
+  "name": "new-op",
+  "version": "1.0.0",
+  "description": "Веб-приложение для управления платежами с Telegram интеграцией.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently --prefix-colors \"green,blue\" --prefix \"[{name}]\" --names \"backend,frontend\" \"npm run backend\" \"npm run frontend\"",
+    "backend": "cd backend && npm run start:dev",
+    "frontend": "cd frontend && npm run dev",
+    "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "build": "cd backend && npm run build && cd ../frontend && npm run build",
+    "start": "cd backend && npm run start:prod"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
