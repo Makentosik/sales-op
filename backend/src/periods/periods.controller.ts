@@ -41,6 +41,16 @@ export class PeriodsController {
     return this.periodsService.getPeriodStats(id);
   }
 
+  @Get(':id/grade-transitions')
+  getPeriodGradeTransitions(@Param('id') id: string) {
+    return this.periodsService.getPeriodGradeTransitions(id);
+  }
+
+  @Get(':id/grade-transitions/summary')
+  getPeriodGradeTransitionsSummary(@Param('id') id: string) {
+    return this.periodsService.getPeriodGradeTransitionsSummary(id);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updatePeriodDto: UpdatePeriodDto) {
     return this.periodsService.update(id, updatePeriodDto);

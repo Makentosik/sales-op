@@ -32,11 +32,13 @@ import {
   Edit as EditIcon,
   Assessment as AssessmentIcon,
   DateRange as DateRangeIcon,
+  TrendingUp as TrendingUpIcon,
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { periodsAPI, Period, CreatePeriodDto, UpdatePeriodDto, PeriodStats } from '../services/periods';
 import PeriodForm from '../components/PeriodForm';
+import GradeTransitions from '../components/GradeTransitions';
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   backgroundColor: '#ffffff',
@@ -81,6 +83,11 @@ const Periods: React.FC = () => {
   });
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [periodStats, setPeriodStats] = useState<Record<string, PeriodStats>>({});
+  const [gradeTransitionsDialog, setGradeTransitionsDialog] = useState<{
+    open: boolean;
+    periodId: string | null;
+    periodName: string;
+  }>({ open: false, periodId: null, periodName: '' });
 
   useEffect(() => {
     loadData();
@@ -248,7 +255,7 @@ const Periods: React.FC = () => {
               WebkitTextFillColor: 'transparent',
             }}
           >
-            Управление периодами
+Управление периодами
           </Typography>
           <Button variant="outlined" onClick={() => navigate('/dashboard')} sx={{ mr: 2 }}>
             ← Назад к Dashboard
@@ -396,6 +403,25 @@ const Periods: React.FC = () => {
                               </IconButton>
                             </Tooltip>
                           )}
+
+                          {period.status === 'COMPLETED' && (
+                            <Button
+                              variant="contained"
+                              color="success"
+                              size="small"
+                              startIcon={<TrendingUpIcon />}
+                              onClick={() => {
+                                setGradeTransitionsDialog({
+                                  open: true,
+                                  periodId: period.id,
+                                  periodName: period.name
+                                });
+                              }}
+                              sx={{ ml: 1 }}
+                            >
+                              🔥 ПЕРЕХОДЫ
+                            </Button>
+                          )}
                         </Box>
 
                         <Box>
@@ -469,6 +495,14 @@ const Periods: React.FC = () => {
             </Button>
           </DialogActions>
         </Dialog>
+
+        {/* Диалог переходов грейдов */}
+        <GradeTransitions
+          open={gradeTransitionsDialog.open}
+          onClose={() => setGradeTransitionsDialog({ open: false, periodId: null, periodName: '' })}
+          periodId={gradeTransitionsDialog.periodId}
+          periodName={gradeTransitionsDialog.periodName}
+        />
       </Container>
     </Box>
   );

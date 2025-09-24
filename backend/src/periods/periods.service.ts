@@ -1,11 +1,15 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { GradeTransitionsService } from '../grade-transitions/grade-transitions.service';
 import { CreatePeriodDto, UpdatePeriodDto, CompletePeriodDto, PeriodStatus, PeriodType } from './dto/period.dto';
 import { Period } from '@prisma/client';
 
 @Injectable()
 export class PeriodsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private gradeTransitionsService: GradeTransitionsService
+  ) {}
 
   async findAll(): Promise<Period[]> {
     return this.prisma.period.findMany({
@@ -144,7 +148,7 @@ export class PeriodsService {
       throw new BadRequestException('Only active periods can be completed');
     }
 
-    // Сохраняем снимок данных участников
+    // Сохраняем снимок данных участников ДО обработки переходов
     let participantSnapshots: any = null;
     if (completePeriodDto.saveSnapshot !== false) {
       const participants = await this.prisma.participant.findMany({
@@ -167,8 +171,16 @@ export class PeriodsService {
           ? Math.round((participant.revenue / participant.grade.plan) * 100)
           : 0,
         snapshotAt: new Date().toISOString(),
+        // Добавляем информацию о предупреждениях на момент завершения периода
+        warningStatus: participant.warningStatus,
+        warningPeriodsLeft: participant.warningPeriodsLeft,
       }));
     }
+
+    // ГЛАВНОЕ: Обрабатываем переходы грейдов при завершении периода
+    console.log(`Обработка переходов грейдов для периода: ${period.name}`);
+    const gradeTransitions = await this.gradeTransitionsService.processGradeTransitions(id);
+    console.log(`Выполнено переходов: ${gradeTransitions.length}`);
 
     // Обновляем статус периода
     const completedPeriod = await this.prisma.period.update({
@@ -179,7 +191,7 @@ export class PeriodsService {
       },
     });
 
-    // Создаем лог о завершении периода
+    // Создаем лог о завершении периода с информацией о переходах
     await this.prisma.log.create({
       data: {
         type: 'PERIOD_END',
@@ -187,13 +199,240 @@ export class PeriodsService {
         details: {
           periodId: id,
           participantCount: participantSnapshots ? (participantSnapshots as any[]).length : 0,
+          gradeTransitionsCount: gradeTransitions.length,
           completedAt: new Date().toISOString(),
+          transitions: gradeTransitions.map(t => ({
+            participantId: t.participantId,
+            type: t.transitionType,
+            reason: t.reason,
+            completionPercentage: t.completionPercentage
+          }))
         },
         periodId: id,
       },
     });
 
+    // Создаем отдельные логи для каждого перехода
+    for (const transition of gradeTransitions) {
+      await this.prisma.log.create({
+        data: {
+          type: 'GRADE_CHANGE',
+          message: `Переход грейда: ${transition.reason}`,
+          details: {
+            transitionId: transition.id,
+            transitionType: transition.transitionType,
+            completionPercentage: transition.completionPercentage,
+            revenue: transition.revenue
+          },
+          participantId: transition.participantId,
+          periodId: id,
+        },
+      });
+    }
+
     return completedPeriod;
+  }
+
+  /**
+   * Получить все переходы грейдов для конкретного периода
+   */
+  async getPeriodGradeTransitions(periodId: string) {
+    const period = await this.findOne(periodId);
+    
+    const transitions = await this.prisma.gradeTransition.findMany({
+      where: { periodId },
+      include: {
+        participant: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            telegramId: true
+          }
+        },
+        fromGrade: {
+          select: {
+            id: true,
+            name: true,
+            plan: true,
+            color: true,
+            order: true
+          }
+        },
+        toGrade: {
+          select: {
+            id: true,
+            name: true,
+            plan: true,
+            color: true,
+            order: true
+          }
+        }
+      },
+      orderBy: [
+        { transitionType: 'desc' }, // Сначала повышения, потом понижения
+        { completionPercentage: 'desc' } // По убыванию процента выполнения
+      ]
+    });
+
+    // Группируем переходы по типам
+    const promotions = transitions.filter(t => t.transitionType === 'PROMOTION');
+    const demotions = transitions.filter(t => t.transitionType === 'DEMOTION');
+    const initialAssignments = transitions.filter(t => t.transitionType === 'INITIAL');
+
+    // Статистика переходов
+    const stats = {
+      totalTransitions: transitions.length,
+      promotions: promotions.length,
+      demotions: demotions.length,
+      initialAssignments: initialAssignments.length,
+      averageCompletionPercentage: transitions.length > 0 
+        ? Math.round(transitions.reduce((sum, t) => sum + t.completionPercentage, 0) / transitions.length)
+        : 0
+    };
+
+    return {
+      period: {
+        id: period.id,
+        name: period.name,
+        startDate: period.startDate,
+        endDate: period.endDate,
+        status: period.status
+      },
+      stats,
+      transitions: {
+        promotions: promotions.map(t => this.formatTransition(t)),
+        demotions: demotions.map(t => this.formatTransition(t)),
+        initialAssignments: initialAssignments.map(t => this.formatTransition(t)),
+        all: transitions.map(t => this.formatTransition(t))
+      }
+    };
+  }
+
+  /**
+   * Форматирует переход для отображения
+   */
+  private formatTransition(transition: any) {
+    const participantName = `${transition.participant.firstName} ${transition.participant.lastName || ''}`.trim();
+    
+    let directionIcon = '';
+    let statusColor = '';
+    
+    switch (transition.transitionType) {
+      case 'PROMOTION':
+        directionIcon = '⬆️';
+        statusColor = '#4caf50'; // зеленый
+        break;
+      case 'DEMOTION':
+        directionIcon = '⬇️';
+        statusColor = '#f44336'; // красный
+        break;
+      case 'INITIAL':
+        directionIcon = '🎯';
+        statusColor = '#2196f3'; // синий
+        break;
+    }
+
+    return {
+      id: transition.id,
+      participant: {
+        id: transition.participant.id,
+        name: participantName,
+        telegramId: transition.participant.telegramId
+      },
+      fromGrade: transition.fromGrade,
+      toGrade: transition.toGrade,
+      transitionType: transition.transitionType,
+      reason: transition.reason,
+      completionPercentage: Math.round(transition.completionPercentage * 100) / 100,
+      revenue: transition.revenue,
+      createdAt: transition.createdAt,
+      // Дополнительные поля для UI
+      display: {
+        directionIcon,
+        statusColor,
+        summary: this.generateTransitionSummary(transition, participantName)
+      }
+    };
+  }
+
+  /**
+   * Генерирует краткое описание перехода
+   */
+  private generateTransitionSummary(transition: any, participantName: string): string {
+    switch (transition.transitionType) {
+      case 'PROMOTION':
+        const fromGradeName = transition.fromGrade?.name || 'Без грейда';
+        return `${participantName}: ${fromGradeName} → ${transition.toGrade.name} (${Math.round(transition.completionPercentage)}%)`;
+      case 'DEMOTION':
+        return `${participantName}: ${transition.fromGrade.name} → ${transition.toGrade.name} (${Math.round(transition.completionPercentage)}%)`;
+      case 'INITIAL':
+        return `${participantName}: Назначен в ${transition.toGrade.name} (${Math.round(transition.completionPercentage)}%)`;
+      default:
+        return `${participantName}: Изменение грейда`;
+    }
+  }
+
+  /**
+   * Получить краткую сводку переходов для периода
+   */
+  async getPeriodGradeTransitionsSummary(periodId: string) {
+    const period = await this.findOne(periodId);
+    
+    const transitions = await this.prisma.gradeTransition.findMany({
+      where: { periodId },
+      include: {
+        participant: {
+          select: {
+            firstName: true,
+            lastName: true
+          }
+        },
+        fromGrade: {
+          select: {
+            name: true
+          }
+        },
+        toGrade: {
+          select: {
+            name: true
+          }
+        }
+      }
+    });
+
+    const promotions = transitions.filter(t => t.transitionType === 'PROMOTION');
+    const demotions = transitions.filter(t => t.transitionType === 'DEMOTION');
+    const initialAssignments = transitions.filter(t => t.transitionType === 'INITIAL');
+
+    return {
+      period: {
+        id: period.id,
+        name: period.name,
+        status: period.status
+      },
+      summary: {
+        totalTransitions: transitions.length,
+        promotions: promotions.length,
+        demotions: demotions.length,
+        initialAssignments: initialAssignments.length,
+        // Краткие списки для отображения
+        promotionsList: promotions.map(t => {
+          const name = `${t.participant.firstName} ${t.participant.lastName || ''}`.trim();
+          const fromGrade = t.fromGrade?.name || 'Без грейда';
+          return `${name}: ${fromGrade} → ${t.toGrade.name}`;
+        }),
+        demotionsList: demotions.map(t => {
+          const name = `${t.participant.firstName} ${t.participant.lastName || ''}`.trim();
+          const fromGrade = t.fromGrade?.name || 'Без грейда';
+          return `${name}: ${fromGrade} → ${t.toGrade.name}`;
+        }),
+        initialAssignmentsList: initialAssignments.map(t => {
+          const name = `${t.participant.firstName} ${t.participant.lastName || ''}`.trim();
+          return `${name}: Назначен в ${t.toGrade.name}`;
+        })
+      }
+    };
   }
 
   async cancel(id: string): Promise<Period> {

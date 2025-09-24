@@ -8,6 +8,7 @@ import { UsersModule } from './users/users.module';
 import { GradesModule } from './grades/grades.module';
 import { ParticipantsModule } from './participants/participants.module';
 import { PeriodsModule } from './periods/periods.module';
+import { GradeTransitionsModule } from './grade-transitions/grade-transitions.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { PeriodsModule } from './periods/periods.module';
     GradesModule,
     ParticipantsModule,
     PeriodsModule,
+    GradeTransitionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
