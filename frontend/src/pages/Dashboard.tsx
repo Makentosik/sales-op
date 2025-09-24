@@ -28,6 +28,8 @@ import {
   SettingsRounded,
   NotificationsRounded,
   MenuRounded,
+  TrendingUp,
+  Assessment,
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
@@ -119,36 +121,48 @@ const Dashboard: React.FC = () => {
     navigate('/login');
   };
 
-  // Заглушка для статистики
-  const stats = [
+  // Навигационные карточки
+  const navigationCards = [
     {
-      title: 'Всего участников',
-      value: '156',
-      change: '+12%',
+      title: 'Менеджеры',
+      description: 'Управление участниками',
       icon: <PeopleRounded />,
       color: '#3498db',
+      route: '/participants',
+      badge: '42 активных'
     },
     {
-      title: 'Активные платежи',
-      value: '₽ 2,450,000',
-      change: '+8%',
-      icon: <PaymentsRounded />,
-      color: '#27ae60',
-    },
-    {
-      title: 'Текущий период',
-      value: 'Декабрь 2024',
-      change: '15 дней',
+      title: 'Грейды',
+      description: 'Настройка уровней',
       icon: <AssessmentRounded />,
-      color: '#9b59b6',
+      color: '#27ae60', 
+      route: '/grades',
+      badge: '6 уровней'
     },
     {
-      title: 'Средний грейд',
-      value: 'Middle',
-      change: '65,000 ₽',
+      title: 'Лидерборд',
+      description: 'Рейтинг продаж',
       icon: <DashboardRounded />,
-      color: '#e74c3c',
+      color: '#f39c12',
+      route: '/leaderboard',
+      badge: '🏆'
     },
+    {
+      title: 'Периоды',
+      description: 'Управление временем',
+      icon: <SettingsRounded />,
+      color: '#9b59b6',
+      route: '/periods',
+      badge: 'Декабрь 2024'
+    },
+    {
+      title: 'Расчет ЗП',
+      description: 'Калькулятор зарплат',
+      icon: <PaymentsRounded />,
+      color: '#e74c3c',
+      route: '/salary-calculator',
+      badge: '₽ 2.45M'
+    }
   ];
 
   return (
@@ -233,7 +247,7 @@ const Dashboard: React.FC = () => {
               <Typography variant="h4" fontWeight={600} gutterBottom>
                 Добро пожаловать, {user?.name || 'Пользователь'}! 👋
               </Typography>
-              <Typography variant="body1" sx={{ mb: 3, opacity: 0.95 }}>
+              <Typography variant="body1" sx={{ mb: 2, opacity: 0.95 }}>
                 Сегодня {new Date().toLocaleDateString('ru-RU', { 
                   weekday: 'long', 
                   year: 'numeric', 
@@ -241,112 +255,56 @@ const Dashboard: React.FC = () => {
                   day: 'numeric' 
                 })}
               </Typography>
-              <Box sx={{ display: 'flex', gap: 2 }}>
-                <Button
-                  variant="contained"
-                  sx={{
-                    backgroundColor: 'white',
-                    color: '#006657',
-                    '&:hover': {
-                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                    },
-                  }}
-                  onClick={() => navigate('/grades')}
-                >
-                  Управление грейдами
-                </Button>
-                <Button
-                  variant="contained"
-                  sx={{
-                    backgroundColor: 'white',
-                    color: '#006657',
-                    '&:hover': {
-                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                    },
-                  }}
-                  onClick={() => navigate('/participants')}
-                >
-                  Управление менеджерами
-                </Button>
-                <Button
-                  variant="outlined"
-                  sx={{
-                    borderColor: 'white',
-                    color: 'white',
-                    '&:hover': {
-                      borderColor: 'white',
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    },
-                  }}
-                  onClick={() => navigate('/leaderboard')}
-                >
-                  Лидерборд 🏆
-                </Button>
-                <Button
-                  variant="outlined"
-                  sx={{
-                    borderColor: 'white',
-                    color: 'white',
-                    '&:hover': {
-                      borderColor: 'white',
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    },
-                  }}
-                  onClick={() => navigate('/periods')}
-                >
-                  Периоды 📅
-                </Button>
-                <Button
-                  variant="contained"
-                  sx={{
-                    backgroundColor: 'white',
-                    color: '#006657',
-                    '&:hover': {
-                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                    },
-                  }}
-                  onClick={() => navigate('/salary-calculator')}
-                >
-                  Расчет зарплаты 💰
-                </Button>
-              </Box>
+              <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                Выберите нужный раздел для работы
+              </Typography>
             </WelcomeCard>
 
-            {/* Statistics Cards */}
+            {/* Navigation Cards */}
             <Grid container spacing={3} sx={{ mb: 4 }}>
-              {stats.map((stat, index) => (
-                <Grid item xs={12} sm={6} md={3} key={index}>
+              {navigationCards.map((card, index) => (
+                <Grid item xs={12} sm={6} md={4} lg={2.4} key={index}>
                   <Fade in timeout={500 + index * 100}>
-                    <StatCard>
-                      <CardContent>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                          <Box
-                            sx={{
-                              width: 48,
-                              height: 48,
-                              borderRadius: 2,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              backgroundColor: `${stat.color}20`,
-                              color: stat.color,
-                            }}
-                          >
-                            {stat.icon}
-                          </Box>
+                    <StatCard 
+                      onClick={() => navigate(card.route)}
+                      sx={{ cursor: 'pointer' }}
+                    >
+                      <CardContent sx={{ textAlign: 'center', py: 3 }}>
+                        <Box
+                          sx={{
+                            width: 56,
+                            height: 56,
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: `${card.color}15`,
+                            color: card.color,
+                            margin: '0 auto 16px auto',
+                            fontSize: '24px'
+                          }}
+                        >
+                          {card.icon}
                         </Box>
-                        <Typography color="text.secondary" variant="body2" gutterBottom>
-                          {stat.title}
+                        
+                        <Typography variant="h6" fontWeight={600} gutterBottom>
+                          {card.title}
                         </Typography>
-                        <Typography variant="h4" fontWeight={600} sx={{ mb: 1 }}>
-                          {stat.value}
+                        
+                        <Typography 
+                          color="text.secondary" 
+                          variant="body2" 
+                          sx={{ mb: 2, minHeight: '32px' }}
+                        >
+                          {card.description}
                         </Typography>
+                        
                         <Chip
-                          label={stat.change}
+                          label={card.badge}
                           size="small"
                           sx={{
-                            backgroundColor: '#27ae6020',
-                            color: '#27ae60',
+                            backgroundColor: `${card.color}20`,
+                            color: card.color,
                             fontWeight: 500,
                           }}
                         />
@@ -357,15 +315,67 @@ const Dashboard: React.FC = () => {
               ))}
             </Grid>
 
-            {/* Placeholder for future content */}
-            <Paper sx={{ p: 4, textAlign: 'center' }}>
-              <Typography variant="h5" color="text.secondary" gutterBottom>
-                Здесь будет основной контент
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Таблицы участников, графики, управление периодами и другие функции
-              </Typography>
-            </Paper>
+            {/* Quick Summary */}
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={8}>
+                <Paper sx={{ p: 3, height: '100%' }}>
+                  <Typography variant="h6" fontWeight={600} gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                    <TrendingUp sx={{ mr: 1, color: '#006657' }} />
+                    Краткая сводка
+                  </Typography>
+                  
+                  <Grid container spacing={2} sx={{ mt: 1 }}>
+                    <Grid item xs={6} sm={3}>
+                      <Box sx={{ textAlign: 'center' }}>
+                        <Typography variant="h4" color="primary" fontWeight={600}>42</Typography>
+                        <Typography variant="caption" color="text.secondary">Активных менеджеров</Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={6} sm={3}>
+                      <Box sx={{ textAlign: 'center' }}>
+                        <Typography variant="h4" color="success.main" fontWeight={600}>6</Typography>
+                        <Typography variant="caption" color="text.secondary">Грейдов</Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={6} sm={3}>
+                      <Box sx={{ textAlign: 'center' }}>
+                        <Typography variant="h4" color="warning.main" fontWeight={600}>15</Typography>
+                        <Typography variant="caption" color="text.secondary">Дней в периоде</Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={6} sm={3}>
+                      <Box sx={{ textAlign: 'center' }}>
+                        <Typography variant="h4" color="error.main" fontWeight={600}>₽2.45M</Typography>
+                        <Typography variant="caption" color="text.secondary">Общая ЗП</Typography>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </Paper>
+              </Grid>
+              
+              <Grid item xs={12} md={4}>
+                <Paper sx={{ p: 3, height: '100%' }}>
+                  <Typography variant="h6" fontWeight={600} gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Assessment sx={{ mr: 1, color: '#006657' }} />
+                    Текущий период
+                  </Typography>
+                  
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant="h5" fontWeight={600} color="primary">
+                      Декабрь 2024
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                      Осталось 15 дней
+                    </Typography>
+                    
+                    <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
+                      <Chip label="Активный" color="success" size="small" />
+                      <Chip label="Месячный" variant="outlined" size="small" />
+                    </Box>
+                  </Box>
+                </Paper>
+              </Grid>
+            </Grid>
           </Box>
         </Fade>
       </MainContent>
