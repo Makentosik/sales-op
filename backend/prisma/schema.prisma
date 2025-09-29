@@ -149,7 +149,7 @@ model GradeTransition {
   participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
   fromGrade     Grade?      @relation(name: "FromGradeTransitions", fields: [fromGradeId], references: [id])
   toGrade       Grade       @relation(name: "ToGradeTransitions", fields: [toGradeId], references: [id])
-  period        Period      @relation(fields: [periodId], references: [id])
+  period        Period      @relation(fields: [periodId], references: [id], onDelete: Cascade)
 }
 
 enum UserRole {

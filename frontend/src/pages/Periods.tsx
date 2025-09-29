@@ -236,7 +236,7 @@ const Periods: React.FC = () => {
   const canActivate = (period: Period) => period.status === 'PENDING' && !currentPeriod;
   const canComplete = (period: Period) => period.status === 'ACTIVE';
   const canCancel = (period: Period) => ['PENDING', 'ACTIVE'].includes(period.status);
-  const canDelete = (period: Period) => ['PENDING', 'CANCELLED'].includes(period.status);
+  const canDelete = (period: Period) => ['PENDING', 'CANCELLED', 'COMPLETED'].includes(period.status);
   const canEdit = (period: Period) => ['PENDING'].includes(period.status);
 
   return (
@@ -478,6 +478,13 @@ const Periods: React.FC = () => {
           <DialogContent>
             <DialogContentText>
               Вы уверены, что хотите удалить период "{deleteDialog.period?.name}"?
+              {deleteDialog.period?.status === 'COMPLETED' && (
+                <>
+                  <br /><br />
+                  <strong>Внимание:</strong> Это завершенный период со статистикой и историей переходов. После удаления все связанные данные будут потеряны.
+                </>
+              )}
+              <br />
               Это действие нельзя отменить.
             </DialogContentText>
           </DialogContent>

@@ -165,6 +165,7 @@ export class GradeTransitionsService {
 
   /**
    * Проверяет возможность повышения грейда
+   * Новая логика: менеджер поднимается на самый высокий грейд, план которого он выполнил
    */
   private checkPromotion(
     participant: ParticipantWithGrade,
@@ -173,30 +174,48 @@ export class GradeTransitionsService {
     currentGradeIndex: number,
     completionPercentage: number
   ) {
-    // Условие 1: Выполнил план текущего грейда на 120% и выше
-    if (completionPercentage >= 120) {
-      const nextGrade = allGrades[currentGradeIndex - 1]; // ИСПРАВЛЕНО: повышение = меньший индекс
-      if (nextGrade) {
-        return {
-          shouldPromote: true,
-          targetGrade: nextGrade,
-          reason: `Выполнил план на ${completionPercentage.toFixed(1)}% (≥120%)`
-        };
-      }
-    }
+    // Находим самый высокий грейд, план которого выполнен на 100% или выше
+    let bestGradeIndex = currentGradeIndex;
+    let bestGrade = currentGrade;
+    let bestCompletion = completionPercentage;
+    let promotionReason = '';
 
-    // Условие 2: Выполнил план более высокого грейда на 100%
-    for (let i = currentGradeIndex - 1; i >= 0; i--) { // ИСПРАВЛЕНО: ищем выше по иерархии
+    // Проверяем все грейды выше текущего (меньший индекс = выше по иерархии)
+    for (let i = currentGradeIndex - 1; i >= 0; i--) {
       const higherGrade = allGrades[i];
       const higherGradeCompletion = (participant.revenue / higherGrade.plan) * 100;
       
+      // Если план этого грейда выполнен на 100% или выше
       if (higherGradeCompletion >= 100) {
-        return {
-          shouldPromote: true,
-          targetGrade: higherGrade,
-          reason: `Выполнил план грейда "${higherGrade.name}" на ${higherGradeCompletion.toFixed(1)}%`
-        };
+        bestGradeIndex = i;
+        bestGrade = higherGrade;
+        bestCompletion = higherGradeCompletion;
+        promotionReason = `Выполнил план грейда \"${higherGrade.name}\" на ${higherGradeCompletion.toFixed(1)}%`;
+      } else {
+        // Если не выполняет план этого грейда, останавливаемся
+        // (так как грейды отсортированы по порядку)
+        break;
       }
+    }
+
+    // Дополнительное условие: если выполнил текущий план на 120%+, можно подняться на 1 уровень
+    if (bestGradeIndex === currentGradeIndex && completionPercentage >= 120) {
+      const nextGrade = allGrades[currentGradeIndex - 1];
+      if (nextGrade) {
+        bestGradeIndex = currentGradeIndex - 1;
+        bestGrade = nextGrade;
+        bestCompletion = completionPercentage;
+        promotionReason = `Выполнил план текущего грейда на ${completionPercentage.toFixed(1)}% (≥120%)`;
+      }
+    }
+
+    // Если найден грейд выше текущего
+    if (bestGradeIndex < currentGradeIndex) {
+      return {
+        shouldPromote: true,
+        targetGrade: bestGrade,
+        reason: promotionReason
+      };
     }
 
     return { shouldPromote: false, targetGrade: allGrades[0], reason: '' };
@@ -204,6 +223,7 @@ export class GradeTransitionsService {
 
   /**
    * Проверяет необходимость понижения грейда
+   * Новая логика: менеджер опускается на самый высокий грейд, план которого он может выполнить
    */
   private checkDemotion(
     participant: ParticipantWithGrade,
@@ -212,30 +232,57 @@ export class GradeTransitionsService {
     currentGradeIndex: number,
     completionPercentage: number
   ) {
-    // Немедленное понижение при выполнении плана на 70% и ниже
-    if (completionPercentage <= 70) {
-      const lowerGrade = allGrades[currentGradeIndex + 1]; // ИСПРАВЛЕНО: понижение = больший индекс
-      if (lowerGrade) {
-        return {
-          shouldDemote: true,
-          targetGrade: lowerGrade,
-          reason: `Выполнил план на ${completionPercentage.toFixed(1)}% (≤70%)`
-        };
-      }
-    }
-
-    // Проверка предупреждений и истечения срока
+    // Проверяем предупреждения и истечения срока
     if (participant.warningStatus && participant.warningPeriodsLeft <= 1) {
-      const lowerGrade = allGrades[currentGradeIndex + 1]; // ИСПРАВЛЕНО: понижение = больший индекс
-      if (lowerGrade) {
+      // Находим подходящий грейд по текущей выручке
+      const appropriateGrade = this.findGradeByRevenue(participant.revenue, allGrades);
+      
+      if (appropriateGrade && appropriateGrade.order > currentGrade.order) {
         const warningReason = participant.warningStatus === WarningStatus.WARNING_90 
           ? '90%' 
           : '80%';
         return {
           shouldDemote: true,
-          targetGrade: lowerGrade,
-          reason: `Не закрепился после предупреждения ${warningReason}`
+          targetGrade: appropriateGrade,
+          reason: `Не закрепился после предупреждения ${warningReason} - переход в соответствующий грейд`
         };
+      } else if (!appropriateGrade) {
+        // Если не подходит ни под один грейд, опускаем на один уровень
+        const lowerGrade = allGrades[currentGradeIndex + 1];
+        if (lowerGrade) {
+          const warningReason = participant.warningStatus === WarningStatus.WARNING_90 
+            ? '90%' 
+            : '80%';
+          return {
+            shouldDemote: true,
+            targetGrade: lowerGrade,
+            reason: `Не закрепился после предупреждения ${warningReason}`
+          };
+        }
+      }
+    }
+
+    // Немедленное понижение при выполнении плана на 70% и ниже
+    if (completionPercentage <= 70) {
+      // Находим подходящий грейд по текущей выручке
+      const appropriateGrade = this.findGradeByRevenue(participant.revenue, allGrades);
+      
+      if (appropriateGrade && appropriateGrade.order > currentGrade.order) {
+        return {
+          shouldDemote: true,
+          targetGrade: appropriateGrade,
+          reason: `Выполнил план на ${completionPercentage.toFixed(1)}% (≤70%) - переход в соответствующий грейд по выручке`
+        };
+      } else {
+        // Если по выручке не подходит или находится выше, опускаем на один уровень
+        const lowerGrade = allGrades[currentGradeIndex + 1];
+        if (lowerGrade) {
+          return {
+            shouldDemote: true,
+            targetGrade: lowerGrade,
+            reason: `Выполнил план на ${completionPercentage.toFixed(1)}% (≤70%)`
+          };
+        }
       }
     }
 
@@ -276,12 +323,39 @@ export class GradeTransitionsService {
   }
 
   /**
-   * Находит грейд по выручке
+   * Находит самый высокий грейд, которому соответствует выручка
+   * Если выручка превышает maxRevenue всех грейдов, возвращает самый высокий
    */
   private findGradeByRevenue(revenue: number, grades: Grade[]): Grade | null {
-    return grades.find(grade => 
+    // Сначала ищем точное соответствие по диапазону
+    const exactMatch = grades.find(grade => 
       revenue >= grade.minRevenue && revenue <= grade.maxRevenue
-    ) || null;
+    );
+    
+    if (exactMatch) {
+      return exactMatch;
+    }
+    
+    // Если выручка превышает максимальный диапазон, находим самый высокий грейд
+    const highestGrade = grades.reduce((highest, current) => {
+      return current.order < highest.order ? current : highest; // меньший order = выше в иерархии
+    });
+    
+    // Если выручка превышает maxRevenue самого высокого грейда
+    if (revenue > highestGrade.maxRevenue) {
+      return highestGrade;
+    }
+    
+    // Если выручка меньше минимального диапазона, находим самый низкий грейд
+    const lowestGrade = grades.reduce((lowest, current) => {
+      return current.order > lowest.order ? current : lowest; // больший order = ниже в иерархии
+    });
+    
+    if (revenue < lowestGrade.minRevenue) {
+      return lowestGrade;
+    }
+    
+    return null;
   }
 
   /**
