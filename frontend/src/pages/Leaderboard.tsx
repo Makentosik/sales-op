@@ -19,9 +19,9 @@ import {
   EmojiEvents as TrophyIcon,
   AttachMoney as MoneyIcon,
   TrendingUp as TrendingUpIcon,
+  Warning as WarningIcon,
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
-import { useNavigate } from 'react-router-dom';
 import { participantsAPI } from '../services/participants';
 import { gradesAPI } from '../services/grades';
 
@@ -42,6 +42,9 @@ interface Participant {
   revenue: number;
   gradeId?: string;
   grade?: Grade;
+  warningStatus?: 'WARNING_90' | 'WARNING_80' | null;
+  warningPeriodsLeft?: number;
+  lastCompletionPercentage?: number;
 }
 
 interface GroupedParticipants {
@@ -107,7 +110,6 @@ const MoneyEmoji = styled(Box)(({ theme }) => ({
 }));
 
 const Leaderboard: React.FC = () => {
-  const navigate = useNavigate();
   const [groupedParticipants, setGroupedParticipants] = useState<GroupedParticipants[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalRevenue, setTotalRevenue] = useState(0);
@@ -175,6 +177,63 @@ const Leaderboard: React.FC = () => {
     }).format(amount);
   };
 
+  const getWarningChip = (participant: Participant) => {
+    if (!participant.warningStatus) return null;
+
+    const isWarning90 = participant.warningStatus === 'WARNING_90';
+    const isWarning80 = participant.warningStatus === 'WARNING_80';
+    
+    if (isWarning90) {
+      return (
+        <Chip
+          icon={<WarningIcon />}
+          label={`⚠️ ${Math.round(participant.lastCompletionPercentage || 0)}% - ${participant.warningPeriodsLeft} периода до падения`}
+          color="warning"
+          size="small"
+          sx={{
+            fontSize: '11px',
+            fontWeight: 500,
+            backgroundColor: '#fff3cd',
+            color: '#856404',
+            border: '1px solid #ffeaa7',
+            '& .MuiChip-icon': {
+              color: '#f39c12',
+            },
+          }}
+        />
+      );
+    }
+    
+    if (isWarning80) {
+      return (
+        <Chip
+          icon={<WarningIcon />}
+          label={`🚨 ${Math.round(participant.lastCompletionPercentage || 0)}% - ${participant.warningPeriodsLeft} период до падения`}
+          color="error"
+          size="small"
+          sx={{
+            fontSize: '11px',
+            fontWeight: 500,
+            backgroundColor: '#f8d7da',
+            color: '#721c24',
+            border: '1px solid #f5c6cb',
+            animation: 'pulse 2s infinite',
+            '& .MuiChip-icon': {
+              color: '#e74c3c',
+            },
+            '@keyframes pulse': {
+              '0%': { opacity: 1 },
+              '50%': { opacity: 0.7 },
+              '100%': { opacity: 1 },
+            },
+          }}
+        />
+      );
+    }
+    
+    return null;
+  };
+
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
       <StyledAppBar position="sticky">
@@ -193,9 +252,6 @@ const Leaderboard: React.FC = () => {
           >
             Битва менеджеров — {new Date().toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}
           </Typography>
-          <Button variant="outlined" onClick={() => navigate('/dashboard')} sx={{ mr: 2 }}>
-            ← Назад к Dashboard
-          </Button>
         </Toolbar>
       </StyledAppBar>
 
@@ -261,9 +317,12 @@ const Leaderboard: React.FC = () => {
 
                       <Box sx={{ flex: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                          <Typography variant="subtitle1" fontWeight={600}>
-                            {participant.firstName} {participant.lastName}
-                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="subtitle1" fontWeight={600}>
+                              {participant.firstName} {participant.lastName}
+                            </Typography>
+                            {getWarningChip(participant)}
+                          </Box>
                           {percentage >= 100 && (
                             <Chip
                               label="✅ План выполнен"

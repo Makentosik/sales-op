@@ -20,6 +20,7 @@ export class ParticipantsController {
   constructor(private readonly participantsService: ParticipantsService) {}
 
   @Get()
+  @Public()
   findAll(@Query('includeGrade', new ParseBoolPipe({ optional: true })) includeGrade: boolean) {
     return this.participantsService.findAll(includeGrade);
   }

@@ -91,8 +91,17 @@ export class ParticipantsService {
     let updated = 0;
     const errors: string[] = [];
 
-    // Получаем все грейды для матчинга
-    const grades = await this.prisma.grade.findMany();
+    // Получаем все грейды для матчинга, отсортированные по order
+    const grades = await this.prisma.grade.findMany({
+      orderBy: { order: 'desc' },
+    });
+
+    // Находим начальный грейд (с наибольшим order, так как 0 - это самый высокий грейд)
+    const defaultGrade = grades[0];
+    
+    if (!defaultGrade) {
+      throw new Error('В системе нет ни одного грейда. Создайте хотя бы один грейд перед импортом.');
+    }
 
     for (const item of data) {
       try {
@@ -101,9 +110,10 @@ export class ParticipantsService {
         const lastName = nameParts[0] || '';
         const firstName = nameParts.slice(1).join(' ') || nameParts[0] || '';
 
-        // Определяем грейд если он указан
+        // Определяем грейд
         let gradeId: string | undefined;
-        if (item.grade) {
+        
+        if (item.grade && item.grade.trim()) {
           console.log(`Обрабатываем грейд для ${item.name}: "${item.grade}"`);
           
           // Ищем грейд по точному совпадению названия
@@ -116,6 +126,10 @@ export class ParticipantsService {
             console.log('Грейд не найден по точному совпадению');
             console.log('Доступные грейды:', grades.map(g => g.name));
           }
+        } else {
+          // Если грейд пустой, назначаем начальный грейд (с максимальным order)
+          gradeId = defaultGrade.id;
+          console.log(`Грейд не указан для ${item.name}, назначаем начальный грейд: ${defaultGrade.name}`);
         }
 
         // Генерируем уникальный telegramId если нет
@@ -139,7 +153,7 @@ export class ParticipantsService {
             where: { id: existingParticipant.id },
             data: {
               revenue,
-              ...(gradeId && { gradeId }),
+              gradeId, // Всегда обновляем gradeId (либо указанный, либо дефолтный)
             },
           });
           updated++;
@@ -151,7 +165,7 @@ export class ParticipantsService {
               firstName,
               lastName,
               revenue,
-              gradeId,
+              gradeId, // gradeId всегда будет установлен (либо указанный, либо дефолтный)
             },
           });
           created++;

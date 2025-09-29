@@ -22,7 +22,7 @@ function App() {
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/periods" element={<Periods />} />
           <Route path="/salary-calculator" element={<SalaryCalculator />} />
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/" element={<Navigate to="/leaderboard" replace />} />
         </Routes>
       </Router>
     </ThemeProvider>

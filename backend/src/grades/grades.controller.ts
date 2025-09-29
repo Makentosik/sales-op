@@ -11,12 +11,14 @@ import {
 } from '@nestjs/common';
 import { GradesService } from './grades.service';
 import { CreateGradeDto, UpdateGradeDto } from './dto/grade.dto';
+import { Public } from '../auth/public.decorator';
 
 @Controller('grades')
 export class GradesController {
   constructor(private readonly gradesService: GradesService) {}
 
   @Get()
+  @Public()
   findAll() {
     return this.gradesService.findAll();
   }
