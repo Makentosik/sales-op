@@ -2,18 +2,95 @@ import { Injectable, NotFoundException, ConflictException, BadRequestException }
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateParticipantDto, UpdateParticipantDto } from './dto/participant.dto';
 import { ImportParticipantDto } from './dto/import-participant.dto';
-import { Participant } from '@prisma/client';
+import { FilterParticipantsDto, SortField, SortOrder, WarningStatusFilter } from './dto/filter-participants.dto';
+import { Participant, Prisma } from '@prisma/client';
 
 @Injectable()
 export class ParticipantsService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(includeGrade: boolean = true): Promise<Participant[]> {
+  async findAll(filters: FilterParticipantsDto): Promise<Participant[]> {
+    const {
+      search,
+      gradeId,
+      isActive,
+      warningStatus,
+      sortBy = SortField.CREATED_AT,
+      sortOrder = SortOrder.DESC,
+      includeGrade = true
+    } = filters;
+
+    // Строим условия WHERE
+    const where: Prisma.ParticipantWhereInput = {};
+
+    // Поиск по имени/фамилии (для SQLite без mode: 'insensitive')
+    if (search) {
+      where.OR = [
+        {
+          firstName: {
+            contains: search,
+          },
+        },
+        {
+          lastName: {
+            contains: search,
+          },
+        },
+        {
+          username: {
+            contains: search,
+          },
+        },
+      ];
+    }
+
+    // Фильтр по грейду
+    if (gradeId) {
+      where.gradeId = gradeId;
+    }
+
+    // Фильтр по статусу активности
+    if (isActive !== undefined) {
+      where.isActive = isActive;
+    }
+
+    // Фильтр по статусу предупреждений
+    if (warningStatus) {
+      if (warningStatus === WarningStatusFilter.NO_WARNING) {
+        where.warningStatus = null;
+      } else {
+        where.warningStatus = warningStatus;
+      }
+    }
+
+    // Определяем сортировку
+    let orderBy: Prisma.ParticipantOrderByWithRelationInput | Prisma.ParticipantOrderByWithRelationInput[] = {};
+    
+    switch (sortBy) {
+      case SortField.NAME:
+        orderBy = [
+          { firstName: sortOrder },
+          { lastName: sortOrder }
+        ] as Prisma.ParticipantOrderByWithRelationInput[];
+        break;
+      case SortField.REVENUE:
+        orderBy = { revenue: sortOrder };
+        break;
+      case SortField.UPDATED_AT:
+        orderBy = { updatedAt: sortOrder };
+        break;
+      case SortField.CREATED_AT:
+      default:
+        orderBy = { createdAt: sortOrder };
+        break;
+    }
+
     return this.prisma.participant.findMany({
+      where,
       include: {
         grade: includeGrade,
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy,
     });
   }
 

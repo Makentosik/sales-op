@@ -13,6 +13,7 @@ import {
 import { ParticipantsService } from './participants.service';
 import { CreateParticipantDto, UpdateParticipantDto } from './dto/participant.dto';
 import { ImportParticipantDto, ImportParticipantsDto } from './dto/import-participant.dto';
+import { FilterParticipantsDto } from './dto/filter-participants.dto';
 import { Public } from '../auth/public.decorator';
 
 @Controller('participants')
@@ -21,8 +22,8 @@ export class ParticipantsController {
 
   @Get()
   @Public()
-  findAll(@Query('includeGrade', new ParseBoolPipe({ optional: true })) includeGrade: boolean) {
-    return this.participantsService.findAll(includeGrade);
+  findAll(@Query(ValidationPipe) filters: FilterParticipantsDto) {
+    return this.participantsService.findAll(filters);
   }
 
   @Get(':id')

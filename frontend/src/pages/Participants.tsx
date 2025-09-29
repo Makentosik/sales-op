@@ -24,16 +24,29 @@ import {
   AppBar,
   LinearProgress,
   Tooltip,
+  TextField,
+  InputAdornment,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Grid,
+  Card,
+  CardContent,
+  TableSortLabel,
 } from '@mui/material';
 import {
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
   Warning as WarningIcon,
+  Search as SearchIcon,
+  FilterList as FilterListIcon,
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
-import { participantsAPI } from '../services/participants';
+import { participantsAPI, ParticipantFilters } from '../services/participants';
+import { gradesAPI } from '../services/grades';
 
 // Локальные интерфейсы
 interface Grade {
@@ -93,6 +106,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 const Participants: React.FC = () => {
   const navigate = useNavigate();
   const [participants, setParticipants] = useState<Participant[]>([]);
+  const [grades, setGrades] = useState<Grade[]>([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [editingParticipant, setEditingParticipant] = useState<Participant | null>(null);
@@ -109,14 +123,33 @@ const Participants: React.FC = () => {
     severity: 'success',
   });
 
+  // Состояние фильтров
+  const [filters, setFilters] = useState<ParticipantFilters>({
+    search: '',
+    gradeId: '',
+    isActive: undefined,
+    warningStatus: undefined,
+    sortBy: 'createdAt',
+    sortOrder: 'desc',
+  });
+
   useEffect(() => {
     loadParticipants();
+    loadGrades();
   }, []);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      loadParticipants();
+    }, 300); // debounce для поиска
+
+    return () => clearTimeout(timeoutId);
+  }, [filters]);
 
   const loadParticipants = async () => {
     try {
       setLoading(true);
-      const data = await participantsAPI.getAll();
+      const data = await participantsAPI.getAll(filters);
       setParticipants(data);
     } catch (error) {
       console.error('Error loading participants:', error);
@@ -126,8 +159,41 @@ const Participants: React.FC = () => {
     }
   };
 
+  const loadGrades = async () => {
+    try {
+      const data = await gradesAPI.getAll();
+      setGrades(data);
+    } catch (error) {
+      console.error('Error loading grades:', error);
+    }
+  };
+
   const showSnackbar = (message: string, severity: 'success' | 'error' | 'warning' | 'info') => {
     setSnackbar({ open: true, message, severity });
+  };
+
+  // Обработчики фильтров
+  const handleFilterChange = (field: keyof ParticipantFilters, value: any) => {
+    setFilters(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSortChange = (field: string) => {
+    setFilters(prev => ({
+      ...prev,
+      sortBy: field as any,
+      sortOrder: prev.sortBy === field && prev.sortOrder === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      search: '',
+      gradeId: '',
+      isActive: undefined,
+      warningStatus: undefined,
+      sortBy: 'createdAt',
+      sortOrder: 'desc',
+    });
   };
 
   const handleCloseSnackbar = () => {
@@ -214,15 +280,122 @@ const Participants: React.FC = () => {
       </StyledAppBar>
 
       <Container maxWidth="lg" sx={{ py: 4 }}>
+        {/* Панель фильтров */}
+        <Card sx={{ mb: 3 }}>
+          <CardContent>
+            <Grid container spacing={3} alignItems="center">
+              {/* Поиск */}
+              <Grid item xs={12} sm={6} md={4}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  placeholder="Поиск по имени..."
+                  value={filters.search}
+                  onChange={(e) => handleFilterChange('search', e.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon color="action" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+
+              {/* Фильтр по грейду */}
+              <Grid item xs={12} sm={6} md={2}>
+                <FormControl size="small" fullWidth>
+                  <InputLabel>Грейд</InputLabel>
+                  <Select
+                    value={filters.gradeId}
+                    onChange={(e) => handleFilterChange('gradeId', e.target.value)}
+                    label="Грейд"
+                  >
+                    <MenuItem value="">Все</MenuItem>
+                    {grades.map(grade => (
+                      <MenuItem key={grade.id} value={grade.id}>
+                        {grade.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              {/* Фильтр по статусу */}
+              <Grid item xs={12} sm={6} md={2}>
+                <FormControl size="small" fullWidth>
+                  <InputLabel>Статус</InputLabel>
+                  <Select
+                    value={filters.isActive === undefined ? '' : filters.isActive ? 'true' : 'false'}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      handleFilterChange('isActive', value === '' ? undefined : value === 'true');
+                    }}
+                    label="Статус"
+                  >
+                    <MenuItem value="">Все</MenuItem>
+                    <MenuItem value="true">Активные</MenuItem>
+                    <MenuItem value="false">Неактивные</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              {/* Фильтр по предупреждениям */}
+              <Grid item xs={12} sm={6} md={2}>
+                <FormControl size="small" fullWidth>
+                  <InputLabel>Предупреждения</InputLabel>
+                  <Select
+                    value={filters.warningStatus || ''}
+                    onChange={(e) => handleFilterChange('warningStatus', e.target.value || undefined)}
+                    label="Предупреждения"
+                  >
+                    <MenuItem value="">Все</MenuItem>
+                    <MenuItem value="NO_WARNING">Нет</MenuItem>
+                    <MenuItem value="WARNING_90">90%</MenuItem>
+                    <MenuItem value="WARNING_80">80%</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              {/* Кнопка очистки */}
+              <Grid item xs={12} sm={6} md={2}>
+                <Button
+                  variant="outlined"
+                  onClick={clearFilters}
+                  startIcon={<FilterListIcon />}
+                  fullWidth
+                >
+                  Очистить
+                </Button>
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
         <Paper elevation={0} sx={{ overflow: 'hidden' }}>
           {loading && <LinearProgress />}
           <TableContainer>
             <Table>
               <TableHead>
                 <TableRow>
-                  <StyledTableCell width="150px">Имя</StyledTableCell>
+                  <StyledTableCell width="150px">
+                    <TableSortLabel
+                      active={filters.sortBy === 'name'}
+                      direction={filters.sortBy === 'name' ? filters.sortOrder : 'asc'}
+                      onClick={() => handleSortChange('name')}
+                    >
+                      Имя
+                    </TableSortLabel>
+                  </StyledTableCell>
                   <StyledTableCell width="240px">Грейд</StyledTableCell>
-                  <StyledTableCell align="right" width="120px">Выручка</StyledTableCell>
+                  <StyledTableCell align="right" width="120px">
+                    <TableSortLabel
+                      active={filters.sortBy === 'revenue'}
+                      direction={filters.sortBy === 'revenue' ? filters.sortOrder : 'asc'}
+                      onClick={() => handleSortChange('revenue')}
+                    >
+                      Выручка
+                    </TableSortLabel>
+                  </StyledTableCell>
                   <StyledTableCell width="180px">Предупреждения</StyledTableCell>
                   <StyledTableCell width="100px">Статус</StyledTableCell>
                   <StyledTableCell width="80px" align="center" sx={{ position: 'sticky', right: 0, backgroundColor: 'inherit', zIndex: 1 }}>Действия</StyledTableCell>

@@ -22,22 +22,14 @@ import {
   DialogActions,
   Toolbar,
   AppBar,
-  Avatar,
-  Fade,
   LinearProgress,
   Tooltip,
-  Card,
-  CardContent,
-  Grid,
 } from '@mui/material';
 import {
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
   Visibility as ViewIcon,
-  TrendingUp as TrendingUpIcon,
-  People as PeopleIcon,
-  AttachMoney as MoneyIcon,
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
@@ -101,15 +93,6 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   backgroundColor: theme.palette.grey[50],
 }));
 
-const GradeChip = styled(Chip)<{ gradeColor: string }>(({ gradeColor }) => ({
-  backgroundColor: `${gradeColor}20`,
-  color: gradeColor,
-  fontWeight: 600,
-  '& .MuiChip-avatar': {
-    backgroundColor: gradeColor,
-    color: 'white',
-  },
-}));
 
 const Grades: React.FC = () => {
   const navigate = useNavigate();
@@ -229,15 +212,6 @@ const Grades: React.FC = () => {
     return new Intl.NumberFormat('ru-RU').format(num);
   };
 
-  // Вычисляем статистику
-  const totalParticipants = grades.reduce((sum, grade) => sum + (grade._count?.participants || 0), 0);
-  const totalPlan = grades.reduce((sum, grade) => sum + grade.plan, 0);
-  const averageBonus = grades.length > 0 
-    ? grades.reduce((sum, grade) => {
-        const baseLevel = grade.performanceLevels?.find(level => level.completionPercentage === 100) || grade.performanceLevels?.[0];
-        return sum + (baseLevel ? baseLevel.bonus : 0);
-      }, 0) / grades.length
-    : 0;
 
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
@@ -277,66 +251,6 @@ const Grades: React.FC = () => {
       </StyledAppBar>
 
       <Container maxWidth="xl" sx={{ py: 4 }}>
-        {/* Статистика */}
-        <Grid container spacing={3} sx={{ mb: 4 }}>
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Avatar sx={{ bgcolor: '#3498db', mr: 2 }}>
-                    <PeopleIcon />
-                  </Avatar>
-                  <Box>
-                    <Typography variant="h4" fontWeight={600}>
-                      {totalParticipants}
-                    </Typography>
-                    <Typography color="text.secondary" variant="body2">
-                      Всего участников
-                    </Typography>
-                  </Box>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Avatar sx={{ bgcolor: '#27ae60', mr: 2 }}>
-                    <TrendingUpIcon />
-                  </Avatar>
-                  <Box>
-                    <Typography variant="h4" fontWeight={600}>
-                      {formatCurrency(totalPlan)}
-                    </Typography>
-                    <Typography color="text.secondary" variant="body2">
-                      Общий план
-                    </Typography>
-                  </Box>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Avatar sx={{ bgcolor: '#e74c3c', mr: 2 }}>
-                    <MoneyIcon />
-                  </Avatar>
-                  <Box>
-                    <Typography variant="h4" fontWeight={600}>
-                      {formatCurrency(averageBonus)}
-                    </Typography>
-                    <Typography color="text.secondary" variant="body2">
-                      Средняя премия
-                    </Typography>
-                  </Box>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
 
         <Paper elevation={0} sx={{ overflow: 'hidden' }}>
           {loading && <LinearProgress />}
@@ -347,26 +261,13 @@ const Grades: React.FC = () => {
                 <TableRow>
                   <StyledTableCell>Грейд</StyledTableCell>
                   <StyledTableCell align="right">План</StyledTableCell>
-                  <StyledTableCell align="center">% Выполнения</StyledTableCell>
-                  <StyledTableCell align="center">% Премии</StyledTableCell>
-                  <StyledTableCell align="right">Премия</StyledTableCell>
-                  <StyledTableCell align="right">Оклад</StyledTableCell>
-                  <StyledTableCell align="center">Всего ЗП</StyledTableCell>
                   <StyledTableCell align="center">Участники</StyledTableCell>
                   <StyledTableCell align="center">Статус</StyledTableCell>
                   <StyledTableCell align="center">Действия</StyledTableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {grades.map((grade) => {
-                  const baseLevel = grade.performanceLevels?.find(level => level.completionPercentage === 100) || grade.performanceLevels?.[0];
-                  
-                  if (!baseLevel) return null; // Если нет подуровней, не рендерим строку
-                  
-                  const totalSalary = baseLevel.totalSalary;
-                  const completionPercentage = Math.round((grade.plan / grade.maxRevenue) * 100);
-                  
-                  return (
+                {grades.map((grade) => (
                     <TableRow key={grade.id} hover>
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -392,27 +293,6 @@ const Grades: React.FC = () => {
                       <TableCell align="right">
                         <Typography variant="body2" fontWeight={600}>
                           {formatCurrency(grade.plan)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        <GradeChip
-                          gradeColor={grade.color}
-                          label={`${completionPercentage}%`}
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        {baseLevel.bonusPercentage.toFixed(2)}%
-                      </TableCell>
-                      <TableCell align="right">
-                        {formatCurrency(baseLevel.bonus)}
-                      </TableCell>
-                      <TableCell align="right">
-                        {formatCurrency(baseLevel.salary)}
-                      </TableCell>
-                      <TableCell align="center">
-                        <Typography variant="body2" fontWeight={600} color="primary.main">
-                          {formatCurrency(totalSalary)}
                         </Typography>
                       </TableCell>
                       <TableCell align="center">
@@ -455,8 +335,7 @@ const Grades: React.FC = () => {
                         </Tooltip>
                       </TableCell>
                     </TableRow>
-                  );
-                })}
+                  ))}
               </TableBody>
             </Table>
           </TableContainer>
