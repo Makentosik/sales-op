@@ -20,8 +20,10 @@ import {
   AttachMoney as MoneyIcon,
   TrendingUp as TrendingUpIcon,
   Warning as WarningIcon,
+  Dashboard as DashboardIcon,
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom';
 import { participantsAPI } from '../services/participants';
 import { gradesAPI } from '../services/grades';
 
@@ -110,11 +112,17 @@ const MoneyEmoji = styled(Box)(({ theme }) => ({
 }));
 
 const Leaderboard: React.FC = () => {
+  const navigate = useNavigate();
   const [groupedParticipants, setGroupedParticipants] = useState<GroupedParticipants[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalRevenue, setTotalRevenue] = useState(0);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
+    // Проверяем авторизацию
+    const token = localStorage.getItem('token');
+    setIsAuthenticated(!!token);
+    
     loadData();
   }, []);
 
@@ -252,6 +260,21 @@ const Leaderboard: React.FC = () => {
           >
             Битва менеджеров — {new Date().toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}
           </Typography>
+          {isAuthenticated && (
+            <Button
+              variant="contained"
+              startIcon={<DashboardIcon />}
+              onClick={() => navigate('/dashboard')}
+              sx={{
+                backgroundColor: '#006657',
+                '&:hover': {
+                  backgroundColor: '#004d47',
+                },
+              }}
+            >
+              Dashboard
+            </Button>
+          )}
         </Toolbar>
       </StyledAppBar>
 
