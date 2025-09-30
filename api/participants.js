@@ -10,6 +10,17 @@ export default function handler(req, res) {
     // Create new participant
     const { firstName, lastName, username, telegramId, revenue = 0, gradeId = '5' } = req.body;
     
+    // Grade mapping
+    const gradeMap = {
+      '1': { name: 'Platinum Elite', plan: 1000000, color: '#FFD700' },
+      '2': { name: 'Gold Premium', plan: 800000, color: '#FFA500' },
+      '3': { name: 'Silver Standard', plan: 500000, color: '#C0C0C0' },
+      '4': { name: 'Bronze Basic', plan: 300000, color: '#CD7F32' },
+      '5': { name: 'Trainee', plan: 150000, color: '#808080' }
+    };
+    
+    const grade = gradeMap[gradeId] || gradeMap['5'];
+    
     const newParticipant = {
       id: Date.now().toString(),
       firstName,
@@ -28,9 +39,9 @@ export default function handler(req, res) {
       updatedAt: new Date().toISOString(),
       grade: {
         id: gradeId,
-        name: gradeId === '5' ? 'Trainee' : 'Unknown',
-        plan: gradeId === '5' ? 150000 : 0,
-        color: '#808080'
+        name: grade.name,
+        plan: grade.plan,
+        color: grade.color
       }
     };
 
