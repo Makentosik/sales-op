@@ -337,7 +337,7 @@ const GradeForm: React.FC<GradeFormProps> = ({
                   </Typography>
                   
                   <Grid2 container spacing={2}>
-                    <Grid2 size=\{\{ xs: {12, md: 2.4}}\}>
+                    <Grid2 size={{ xs: 12, md: 2.4 }}>
                       <TextField
                         fullWidth
                         label="Выручка"
@@ -351,7 +351,7 @@ const GradeForm: React.FC<GradeFormProps> = ({
                       />
                     </Grid2>
                     
-                    <Grid2 size=\{\{ xs: {12, md: 2.4}}\}>
+                    <Grid2 size={{ xs: 12, md: 2.4 }}>
                       <TextField
                         fullWidth
                         label="% Премии"
@@ -366,7 +366,7 @@ const GradeForm: React.FC<GradeFormProps> = ({
                       />
                     </Grid2>
                     
-                    <Grid2 size=\{\{ xs: {12, md: 2.4}}\}>
+                    <Grid2 size={{ xs: 12, md: 2.4 }}>
                       <TextField
                         fullWidth
                         label="Премия"
@@ -380,7 +380,7 @@ const GradeForm: React.FC<GradeFormProps> = ({
                       />
                     </Grid2>
                     
-                    <Grid2 size=\{\{ xs: {12, md: 2.4}}\}>
+                    <Grid2 size={{ xs: 12, md: 2.4 }}>
                       <TextField
                         fullWidth
                         label="Оклад"
@@ -394,7 +394,7 @@ const GradeForm: React.FC<GradeFormProps> = ({
                       />
                     </Grid2>
                     
-                    <Grid2 size=\{\{ xs: {12, md: 2.4}}\}>
+                    <Grid2 size={{ xs: 12, md: 2.4 }}>
                       <TextField
                         fullWidth
                         label="Всего ЗП"
@@ -425,13 +425,13 @@ const GradeForm: React.FC<GradeFormProps> = ({
               )}
             </Grid2>
 
-            <Grid2 size=\{\{ xs: {12}}\}>
+            <Grid2 size={{ xs: 12 }}>
               <Typography variant="h6" color="primary" gutterBottom>
                 📊 Диапазон выручки
               </Typography>
             </Grid2>
 
-            <Grid2 size=\{\{ xs: {12, md: 6}}\}>
+            <Grid2 size={{ xs: 12, md: 6 }}>
               <TextField
                 fullWidth
                 label="Минимальная выручка"
@@ -447,7 +447,7 @@ const GradeForm: React.FC<GradeFormProps> = ({
               />
             </Grid2>
 
-            <Grid2 size=\{\{ xs: {12, md: 6}}\}>
+            <Grid2 size={{ xs: 12, md: 6 }}>
               <TextField
                 fullWidth
                 label="Максимальная выручка"
@@ -463,13 +463,13 @@ const GradeForm: React.FC<GradeFormProps> = ({
               />
             </Grid2>
 
-            <Grid2 size=\{\{ xs: {12}}\}>
+            <Grid2 size={{ xs: 12 }}>
               <Typography variant="h6" color="primary" gutterBottom>
                 🎨 Настройки отображения
               </Typography>
             </Grid2>
 
-            <Grid2 size=\{\{ xs: {12, md: 4}}\}>
+            <Grid2 size={{ xs: 12, md: 4 }}>
               <TextField
                 fullWidth
                 label="Цвет"
@@ -480,7 +480,7 @@ const GradeForm: React.FC<GradeFormProps> = ({
               />
             </Grid2>
 
-            <Grid2 size=\{\{ xs: {12, md: 4}}\}>
+            <Grid2 size={{ xs: 12, md: 4 }}>
               <TextField
                 fullWidth
                 label="Порядок"
@@ -492,7 +492,7 @@ const GradeForm: React.FC<GradeFormProps> = ({
             </Grid2>
 
             {grade && (
-              <Grid2 size=\{\{ xs: {12, md: 4}}\}>
+              <Grid2 size={{ xs: 12, md: 4 }}>
                 <FormControlLabel
                   control={
                     <Switch
@@ -508,7 +508,7 @@ const GradeForm: React.FC<GradeFormProps> = ({
             )}
 
             {/* Предварительный просмотр */}
-            <Grid2 size=\{\{ xs: {12}}\}>
+            <Grid2 size={{ xs: 12 }}>
               <Box
                 sx={{
                   p: 2,
