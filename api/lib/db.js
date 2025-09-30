@@ -339,13 +339,13 @@ export async function seedData() {
     // Insert admin user into Prisma User table
     await query(`
       INSERT INTO "User" (email, password, name, role)
-      VALUES ($1, $2, $3, $4)
+      VALUES ($1, $2, $3, $4::"UserRole")
       ON CONFLICT (email) DO NOTHING
     `, [
       'admin@company.com',
       'SecurePass2024!', // In production, this should be hashed
       'Системный Администратор',
-      'ADMIN'::"UserRole"
+      'ADMIN'
     ]);
 
     console.log('Initial data seeded successfully with Prisma schema');
