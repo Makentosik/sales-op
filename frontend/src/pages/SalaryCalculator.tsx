@@ -26,14 +26,12 @@ import {
 import {
   Calculate as CalculateIcon,
   AttachMoney as MoneyIcon,
-  TrendingUp as TrendingUpIcon,
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { 
   salaryCalculatorAPI, 
-  SalaryCalculationResponse,
-  ParticipantSalaryCalculation
+  SalaryCalculationResponse
 } from '../services/salaryCalculator';
 import { periodsAPI, Period } from '../services/periods';
 
@@ -151,7 +149,7 @@ const SalaryCalculator: React.FC = () => {
         {/* Управление периодом */}
         <Paper sx={{ p: 3, mb: 3 }}>
           <Grid container spacing={3} alignItems="center">
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={6} component="div">
               <FormControl fullWidth>
                 <InputLabel id="period-select">Выберите период</InputLabel>
                 <Select
@@ -171,7 +169,7 @@ const SalaryCalculator: React.FC = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={6} component="div">
               <Button
                 variant="contained"
                 startIcon={<CalculateIcon />}
@@ -191,7 +189,7 @@ const SalaryCalculator: React.FC = () => {
           <>
             {/* Сводная информация */}
             <Grid container spacing={3} sx={{ mb: 4 }}>
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12} md={4} component="div">
                 <SummaryCard>
                   <CardContent>
                     <Typography color="textSecondary" gutterBottom variant="h6">

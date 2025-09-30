@@ -258,7 +258,7 @@ const GradeForm: React.FC<GradeFormProps> = ({
       <form onSubmit={handleSubmit}>
         <DialogContent>
           <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={6} component="div">
               <TextField
                 fullWidth
                 label="Название"
@@ -269,7 +269,7 @@ const GradeForm: React.FC<GradeFormProps> = ({
                 required
               />
             </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={6} component="div">
               <TextField
                 fullWidth
                 label="Описание"
@@ -280,7 +280,7 @@ const GradeForm: React.FC<GradeFormProps> = ({
               />
             </Grid>
             
-            <Grid item xs={12}>
+            <Grid item xs={12} component="div">
               <TextField
                 fullWidth
                 label="План"
@@ -297,7 +297,7 @@ const GradeForm: React.FC<GradeFormProps> = ({
               />
             </Grid>
 
-            <Grid item xs={12}>
+            <Grid item xs={12} component="div">
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Box>
                   <Typography variant="h6" color="primary" gutterBottom>
@@ -337,7 +337,7 @@ const GradeForm: React.FC<GradeFormProps> = ({
                   </Typography>
                   
                   <Grid container spacing={2}>
-                    <Grid item xs={12} md={2.4}>
+                    <Grid item xs={12} md={2.4} component="div">
                       <TextField
                         fullWidth
                         label="Выручка"
@@ -351,7 +351,7 @@ const GradeForm: React.FC<GradeFormProps> = ({
                       />
                     </Grid>
                     
-                    <Grid item xs={12} md={2.4}>
+                    <Grid item xs={12} md={2.4} component="div">
                       <TextField
                         fullWidth
                         label="% Премии"
@@ -366,7 +366,7 @@ const GradeForm: React.FC<GradeFormProps> = ({
                       />
                     </Grid>
                     
-                    <Grid item xs={12} md={2.4}>
+                    <Grid item xs={12} md={2.4} component="div">
                       <TextField
                         fullWidth
                         label="Премия"
@@ -380,7 +380,7 @@ const GradeForm: React.FC<GradeFormProps> = ({
                       />
                     </Grid>
                     
-                    <Grid item xs={12} md={2.4}>
+                    <Grid item xs={12} md={2.4} component="div">
                       <TextField
                         fullWidth
                         label="Оклад"
@@ -394,7 +394,7 @@ const GradeForm: React.FC<GradeFormProps> = ({
                       />
                     </Grid>
                     
-                    <Grid item xs={12} md={2.4}>
+                    <Grid item xs={12} md={2.4} component="div">
                       <TextField
                         fullWidth
                         label="Всего ЗП"
@@ -425,13 +425,13 @@ const GradeForm: React.FC<GradeFormProps> = ({
               )}
             </Grid>
 
-            <Grid item xs={12}>
+            <Grid item xs={12} component="div">
               <Typography variant="h6" color="primary" gutterBottom>
                 📊 Диапазон выручки
               </Typography>
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={6} component="div">
               <TextField
                 fullWidth
                 label="Минимальная выручка"
@@ -447,7 +447,7 @@ const GradeForm: React.FC<GradeFormProps> = ({
               />
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={6} component="div">
               <TextField
                 fullWidth
                 label="Максимальная выручка"
@@ -463,13 +463,13 @@ const GradeForm: React.FC<GradeFormProps> = ({
               />
             </Grid>
 
-            <Grid item xs={12}>
+            <Grid item xs={12} component="div">
               <Typography variant="h6" color="primary" gutterBottom>
                 🎨 Настройки отображения
               </Typography>
             </Grid>
 
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={4} component="div">
               <TextField
                 fullWidth
                 label="Цвет"
@@ -480,7 +480,7 @@ const GradeForm: React.FC<GradeFormProps> = ({
               />
             </Grid>
 
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={4} component="div">
               <TextField
                 fullWidth
                 label="Порядок"
@@ -492,7 +492,7 @@ const GradeForm: React.FC<GradeFormProps> = ({
             </Grid>
 
             {grade && (
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12} md={4} component="div">
                 <FormControlLabel
                   control={
                     <Switch
@@ -508,7 +508,7 @@ const GradeForm: React.FC<GradeFormProps> = ({
             )}
 
             {/* Предварительный просмотр */}
-            <Grid item xs={12}>
+            <Grid item xs={12} component="div">
               <Box
                 sx={{
                   p: 2,
