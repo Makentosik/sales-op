@@ -94,7 +94,7 @@ interface User {
 // Компонент логотипа (можно легко заменить на изображение)
 const Logo: React.FC = () => {
   const logoPath = '/logo.png'; // Путь к логотипу
-  const hasLogo = true; // Измените на true, когда добавите логотип
+  const hasLogo = false; // Измените на true, когда добавите логотип
   
   if (hasLogo) {
     return (
@@ -187,13 +187,40 @@ const Dashboard: React.FC = () => {
   ];
 
   useEffect(() => {
-    // Получаем данные пользователя из localStorage
+    console.log('🚀 Dashboard useEffect started');
+    // Проверяем авторизацию - сначала токен, затем данные пользователя
+    const token = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
+    
+    console.log('🔍 Dashboard Auth Check:', { 
+      hasToken: !!token, 
+      hasUser: !!storedUser,
+      tokenLength: token?.length,
+      userInfo: storedUser ? JSON.parse(storedUser) : null
+    });
+    
+    if (!token) {
+      // Если токена нет, перенаправляем на страницу входа
+      console.log('🔴 No token found, redirecting to login');
+      navigate('/login');
+      return;
+    }
+    
     if (storedUser) {
+      // Если есть сохраненные данные пользователя, используем их
       setUser(JSON.parse(storedUser));
     } else {
-      // Если пользователь не авторизован, перенаправляем на страницу входа
-      navigate('/login');
+      // Если токен есть, но данных пользователя нет, создаем базовый объект пользователя
+      // В реальном приложении здесь можно сделать запрос к API для получения данных пользователя
+      const defaultUser: User = {
+        id: 'guest',
+        email: 'guest@system.com',
+        name: 'Гость',
+        role: 'GUEST'
+      };
+      setUser(defaultUser);
+      // Сохраняем базовые данные пользователя для следующих посещений
+      localStorage.setItem('user', JSON.stringify(defaultUser));
     }
   }, [navigate]);
 

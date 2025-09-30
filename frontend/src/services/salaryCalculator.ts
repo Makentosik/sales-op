@@ -14,6 +14,7 @@ export interface ParticipantSalaryCalculation {
   participantName: string;
   currentGrade: string;
   currentGradeId: string;
+  currentGradeColor?: string;
   revenue: number;
   planCompletion: number;
   commissionRate: number;

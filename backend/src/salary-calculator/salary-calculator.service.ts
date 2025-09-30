@@ -89,21 +89,22 @@ export class SalaryCalculatorService {
 
     // Если нет грейда, возвращаем нулевые значения
     if (!currentGrade) {
-      return {
-        participantId: participant.id,
-        participantName: `${participant.firstName} ${participant.lastName || ''}`.trim(),
-        currentGrade: 'Не назначен',
-        currentGradeId: '',
-        revenue,
-        planCompletion: 0,
-        commissionRate: 0,
-        commission: 0,
-        fixedSalary: 0,
-        fixedSalaryGrade: 'Не назначен',
-        bonus: 0,
-        totalSalary: 0,
-        performanceLevel: 'Не назначен',
-      };
+    return {
+      participantId: participant.id,
+      participantName: `${participant.firstName} ${participant.lastName || ''}`.trim(),
+      currentGrade: 'Не назначен',
+      currentGradeId: '',
+      currentGradeColor: '#6c757d',
+      revenue,
+      planCompletion: 0,
+      commissionRate: 0,
+      commission: 0,
+      fixedSalary: 0,
+      fixedSalaryGrade: 'Не назначен',
+      bonus: 0,
+      totalSalary: 0,
+      performanceLevel: 'Не назначен',
+    };
     }
 
     // Рассчитываем процент выполнения плана текущего грейда
@@ -134,6 +135,7 @@ export class SalaryCalculatorService {
       participantName: `${participant.firstName} ${participant.lastName || ''}`.trim(),
       currentGrade: currentGrade.name,
       currentGradeId: currentGrade.id,
+      currentGradeColor: currentGrade.color || '#006657',
       revenue,
       planCompletion,
       commissionRate: performanceLevel.commissionRate,

@@ -22,26 +22,18 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Tooltip,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
 } from '@mui/material';
 import {
   Calculate as CalculateIcon,
   AttachMoney as MoneyIcon,
   TrendingUp as TrendingUpIcon,
-  Info as InfoIcon,
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { 
   salaryCalculatorAPI, 
   SalaryCalculationResponse,
-  ParticipantSalaryCalculation,
-  ParticipantSalaryDetailsResponse 
+  ParticipantSalaryCalculation
 } from '../services/salaryCalculator';
 import { periodsAPI, Period } from '../services/periods';
 
@@ -72,10 +64,6 @@ const SalaryCalculator: React.FC = () => {
   const [salaryData, setSalaryData] = useState<SalaryCalculationResponse | null>(null);
   const [periods, setPeriods] = useState<Period[]>([]);
   const [selectedPeriodId, setSelectedPeriodId] = useState<string>('');
-  const [detailsDialog, setDetailsDialog] = useState<{
-    open: boolean;
-    data: ParticipantSalaryDetailsResponse | null;
-  }>({ open: false, data: null });
 
   useEffect(() => {
     loadPeriods();
@@ -108,14 +96,6 @@ const SalaryCalculator: React.FC = () => {
     }
   };
 
-  const loadParticipantDetails = async (participantId: string) => {
-    try {
-      const data = await salaryCalculatorAPI.getParticipantDetails(participantId);
-      setDetailsDialog({ open: true, data });
-    } catch (error) {
-      console.error('Error loading participant details:', error);
-    }
-  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('ru-RU', {
@@ -265,7 +245,6 @@ const SalaryCalculator: React.FC = () => {
                       <StyledTableCell>Грейд оклада</StyledTableCell>
                       <StyledTableCell align="right">Оклад</StyledTableCell>
                       <StyledTableCell align="right">Итого ЗП</StyledTableCell>
-                      <StyledTableCell align="center">Действия</StyledTableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -276,7 +255,11 @@ const SalaryCalculator: React.FC = () => {
                           <Chip 
                             label={calc.currentGrade} 
                             size="small"
-                            sx={{ backgroundColor: '#006657', color: 'white' }}
+                            sx={{ 
+                              backgroundColor: calc.currentGradeColor || '#006657', 
+                              color: 'white',
+                              fontWeight: 600
+                            }}
                           />
                         </TableCell>
                         <TableCell align="right">
@@ -317,17 +300,6 @@ const SalaryCalculator: React.FC = () => {
                             {formatCurrency(calc.totalSalary)}
                           </Typography>
                         </TableCell>
-                        <TableCell align="center">
-                          <Tooltip title="Подробная информация">
-                            <IconButton
-                              size="small"
-                              color="primary"
-                              onClick={() => loadParticipantDetails(calc.participantId)}
-                            >
-                              <InfoIcon />
-                            </IconButton>
-                          </Tooltip>
-                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -338,61 +310,6 @@ const SalaryCalculator: React.FC = () => {
         )}
       </Container>
 
-      {/* Диалог с детальной информацией */}
-      <Dialog
-        open={detailsDialog.open}
-        onClose={() => setDetailsDialog({ open: false, data: null })}
-        maxWidth="md"
-        fullWidth
-      >
-        {detailsDialog.data && (
-          <>
-            <DialogTitle>
-              Детали расчета ЗП - {detailsDialog.data.currentCalculation.participantName}
-            </DialogTitle>
-            <DialogContent dividers>
-              <Typography variant="h6" gutterBottom>
-                Уровни производительности грейда "{detailsDialog.data.currentCalculation.currentGrade}":
-              </Typography>
-              <TableContainer component={Paper} variant="outlined" sx={{ mt: 2 }}>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Диапазон выполнения</TableCell>
-                      <TableCell align="right">% комиссии</TableCell>
-                      <TableCell align="right">Оклад</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {detailsDialog.data.performanceLevels.map((level, index) => (
-                      <TableRow 
-                        key={index}
-                        sx={{
-                          backgroundColor: 
-                            detailsDialog.data!.currentCalculation.planCompletion >= level.minPercentage &&
-                            detailsDialog.data!.currentCalculation.planCompletion < level.maxPercentage
-                              ? 'rgba(0, 102, 87, 0.08)' : 'inherit'
-                        }}
-                      >
-                        <TableCell>
-                          {level.minPercentage}% - {level.maxPercentage}%
-                        </TableCell>
-                        <TableCell align="right">{level.commissionRate}%</TableCell>
-                        <TableCell align="right">{formatCurrency(level.fixedSalary)}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setDetailsDialog({ open: false, data: null })}>
-                Закрыть
-              </Button>
-            </DialogActions>
-          </>
-        )}
-      </Dialog>
     </Box>
   );
 };

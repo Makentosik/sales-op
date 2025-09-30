@@ -28,9 +28,15 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      console.log('🔴 API 401 Error (redirect disabled for debug):', {
+        url: error.config?.url,
+        method: error.config?.method,
+        message: error.response?.data?.message
+      });
+      // Временно отключаем авторедирект для отладки
+      // localStorage.removeItem('token');
+      // localStorage.removeItem('user');
+      // window.location.href = '/login';
     }
     return Promise.reject(error);
   }

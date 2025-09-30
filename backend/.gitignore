@@ -3,3 +3,9 @@ node_modules
 .env
 
 /generated/prisma
+
+# Database exports (содержат конфиденциальные данные)
+/exports/
+*.db
+*.sqlite
+/prisma/dev.db
