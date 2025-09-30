@@ -2,7 +2,16 @@ import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/co
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
-import { User } from '@prisma/client';
+// Local interface instead of Prisma import
+interface User {
+  id: string;
+  email: string;
+  password: string;
+  name?: string | null;
+  role: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 @Injectable()
 export class AuthService {
