@@ -149,7 +149,7 @@ const Dashboard: React.FC = () => {
       icon: <PeopleRounded />,
       color: '#3498db',
       route: '/participants',
-      badge: '42 активных'
+      badge: 'Менеджеры'
     },
     {
       title: 'Грейды',
@@ -157,7 +157,7 @@ const Dashboard: React.FC = () => {
       icon: <AssessmentRounded />,
       color: '#27ae60', 
       route: '/grades',
-      badge: '6 уровней'
+      badge: 'Уровни'
     },
     {
       title: 'Лидерборд',
@@ -181,7 +181,7 @@ const Dashboard: React.FC = () => {
       icon: <PaymentsRounded />,
       color: '#e74c3c',
       route: '/salary-calculator',
-      badge: '₽ 2.45M'
+      badge: 'Расчеты'
     }
   ];
 

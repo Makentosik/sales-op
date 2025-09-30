@@ -16,7 +16,7 @@ const mockGrades = [
     isActive: true,
     createdAt: '2024-01-01T10:00:00.000Z',
     updatedAt: '2024-01-01T10:00:00.000Z',
-    _count: { participants: 5 }
+    _count: { participants: 0 }
   },
   {
     id: '2',
@@ -35,7 +35,7 @@ const mockGrades = [
     isActive: true,
     createdAt: '2024-01-01T10:00:00.000Z',
     updatedAt: '2024-01-01T10:00:00.000Z',
-    _count: { participants: 8 }
+    _count: { participants: 0 }
   },
   {
     id: '3',
@@ -54,7 +54,7 @@ const mockGrades = [
     isActive: true,
     createdAt: '2024-01-01T10:00:00.000Z',
     updatedAt: '2024-01-01T10:00:00.000Z',
-    _count: { participants: 12 }
+    _count: { participants: 0 }
   },
   {
     id: '4',
@@ -73,7 +73,7 @@ const mockGrades = [
     isActive: true,
     createdAt: '2024-01-01T10:00:00.000Z',
     updatedAt: '2024-01-01T10:00:00.000Z',
-    _count: { participants: 15 }
+    _count: { participants: 0 }
   },
   {
     id: '5',
@@ -92,7 +92,7 @@ const mockGrades = [
     isActive: true,
     createdAt: '2024-01-01T10:00:00.000Z',
     updatedAt: '2024-01-01T10:00:00.000Z',
-    _count: { participants: 8 }
+    _count: { participants: 0 }
   }
 ];
 

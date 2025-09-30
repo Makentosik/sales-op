@@ -5,29 +5,14 @@ export default function handler(req, res) {
 
   const { email, password } = req.body;
 
-  // Mock authentication
-  if (email === 'admin@test.com' && password === 'admin123') {
-    const token = 'mock-jwt-token-' + Date.now();
+  // Production authentication - one working account
+  if (email === 'admin@company.com' && password === 'SecurePass2024!') {
+    const token = 'jwt-token-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
     const user = {
       id: '1',
-      email: 'admin@test.com',
-      name: 'Администратор',
+      email: 'admin@company.com',
+      name: 'Системный Администратор',
       role: 'ADMIN'
-    };
-
-    return res.status(200).json({
-      access_token: token,
-      user
-    });
-  }
-
-  if (email === 'user@test.com' && password === 'user123') {
-    const token = 'mock-jwt-token-' + Date.now();
-    const user = {
-      id: '2',
-      email: 'user@test.com',
-      name: 'Тестовый Пользователь',
-      role: 'USER'
     };
 
     return res.status(200).json({
