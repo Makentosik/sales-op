@@ -15,10 +15,8 @@ import {
   Box,
   Divider,
   Typography,
-  FormControlLabel,
-  Switch
+  SelectChangeEvent
 } from '@mui/material';
-import { participantsAPI } from '../services/participants';
 import { gradesAPI } from '../services/grades';
 
 // Локальные интерфейсы
@@ -135,9 +133,14 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
     onClose();
   };
 
-  const handleChange = (e: React.ChangeEvent<{ name?: string; value: unknown }>) => {
+  const handleChange = (e: SelectChangeEvent<string>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name as string]: value as string }));
+  };
+
+  const handleTextFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   return (
@@ -152,7 +155,7 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
                 label="Имя"
                 name="firstName"
                 value={formData.firstName}
-                onChange={handleChange}
+                onChange={handleTextFieldChange}
                 required
               />
             </Grid>
@@ -162,7 +165,7 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
                 label="Фамилия"
                 name="lastName"
                 value={formData.lastName}
-                onChange={handleChange}
+                onChange={handleTextFieldChange}
               />
             </Grid>
             <Grid item xs={12}>
@@ -212,7 +215,7 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
                 label="Telegram ID"
                 name="telegramId"
                 value={formData.telegramId}
-                onChange={handleChange}
+                onChange={handleTextFieldChange}
                 required
               />
             </Grid>
@@ -222,7 +225,7 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
                 label="Username (Telegram)"
                 name="username"
                 value={formData.username}
-                onChange={handleChange}
+                onChange={handleTextFieldChange}
               />
             </Grid>
             <Grid item xs={12}>
@@ -231,7 +234,7 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
                 label="Номер телефона"
                 name="phoneNumber"
                 value={formData.phoneNumber}
-                onChange={handleChange}
+                onChange={handleTextFieldChange}
               />
             </Grid>
             

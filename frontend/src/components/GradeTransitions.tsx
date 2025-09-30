@@ -11,10 +11,6 @@ import {
   Card,
   CardContent,
   Chip,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
   Tabs,
   Tab,
   CircularProgress,
@@ -91,7 +87,7 @@ const GradeTransitions: React.FC<GradeTransitionsProps> = ({ open, onClose, peri
     }
   };
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
