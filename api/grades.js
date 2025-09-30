@@ -14,19 +14,19 @@ export default async function handler(req, res) {
           g.name,
           g.description,
           g.plan,
-          g.min_revenue as "minRevenue",
-          g.max_revenue as "maxRevenue",
-          g.performance_levels as "performanceLevels",
+          g."minRevenue" as "minRevenue",
+          g."maxRevenue" as "maxRevenue",
+          g."performanceLevels" as "performanceLevels",
           g.color,
-          g.order_num as "order",
-          g.is_active as "isActive",
-          g.created_at as "createdAt",
-          g.updated_at as "updatedAt",
+          g."order" as "order",
+          g."isActive" as "isActive",
+          g."createdAt" as "createdAt",
+          g."updatedAt" as "updatedAt",
           COUNT(p.id) as participant_count
-        FROM grades g
-        LEFT JOIN participants p ON g.id = p.grade_id AND p.is_active = true
-        GROUP BY g.id
-        ORDER BY g.order_num ASC
+        FROM "Grade" g
+        LEFT JOIN "Participant" p ON g.id = p."gradeId" AND p."isActive" = true
+        GROUP BY g.id, g.name, g.description, g.plan, g."minRevenue", g."maxRevenue", g."performanceLevels", g.color, g."order", g."isActive", g."createdAt", g."updatedAt"
+        ORDER BY g."order" ASC
       `);
 
       // Transform the result to match expected format
@@ -58,13 +58,13 @@ export default async function handler(req, res) {
       }
 
       // Check if grade with this name already exists
-      const existingGrade = await query('SELECT id FROM grades WHERE name = $1', [name]);
+      const existingGrade = await query('SELECT id FROM "Grade" WHERE name = $1', [name]);
       if (existingGrade.rows.length > 0) {
         return res.status(409).json({ message: 'Grade with this name already exists' });
       }
 
       const result = await query(`
-        INSERT INTO grades (name, description, plan, min_revenue, max_revenue, performance_levels, color, order_num)
+        INSERT INTO "Grade" (name, description, plan, "minRevenue", "maxRevenue", "performanceLevels", color, "order")
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         RETURNING *
       `, [
@@ -85,14 +85,14 @@ export default async function handler(req, res) {
         name: newGrade.name,
         description: newGrade.description,
         plan: newGrade.plan,
-        minRevenue: newGrade.min_revenue,
-        maxRevenue: newGrade.max_revenue,
-        performanceLevels: newGrade.performance_levels,
+        minRevenue: newGrade.minRevenue,
+        maxRevenue: newGrade.maxRevenue,
+        performanceLevels: newGrade.performanceLevels,
         color: newGrade.color,
-        order: newGrade.order_num,
-        isActive: newGrade.is_active,
-        createdAt: newGrade.created_at,
-        updatedAt: newGrade.updated_at,
+        order: newGrade.order,
+        isActive: newGrade.isActive,
+        createdAt: newGrade.createdAt,
+        updatedAt: newGrade.updatedAt,
         _count: { participants: 0 }
       };
 

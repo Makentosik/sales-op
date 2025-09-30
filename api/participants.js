@@ -11,27 +11,27 @@ export default async function handler(req, res) {
       const result = await query(`
         SELECT 
           p.id,
-          p.first_name as "firstName",
-          p.last_name as "lastName",
+          p."firstName" as "firstName",
+          p."lastName" as "lastName",
           p.username,
-          p.telegram_id as "telegramId",
-          p.is_active as "isActive",
+          p."telegramId" as "telegramId",
+          p."isActive" as "isActive",
           p.revenue,
-          p.join_date as "joinDate",
-          p.grade_id as "gradeId",
-          p.warning_status as "warningStatus",
-          p.warning_count as "warningCount",
-          p.warning_periods_left as "warningPeriodsLeft",
-          p.warning_last_date as "warningLastDate",
-          p.created_at as "createdAt",
-          p.updated_at as "updatedAt",
+          p."joinDate" as "joinDate",
+          p."gradeId" as "gradeId",
+          p."warningStatus" as "warningStatus",
+          p."warningCount" as "warningCount",
+          p."warningPeriodsLeft" as "warningPeriodsLeft",
+          p."warningLastDate" as "warningLastDate",
+          p."createdAt" as "createdAt",
+          p."updatedAt" as "updatedAt",
           g.id as "grade.id",
           g.name as "grade.name",
           g.plan as "grade.plan",
           g.color as "grade.color"
-        FROM participants p
-        LEFT JOIN grades g ON p.grade_id = g.id
-        ORDER BY p.created_at DESC
+        FROM "Participant" p
+        LEFT JOIN "Grade" g ON p."gradeId" = g.id
+        ORDER BY p."createdAt" DESC
       `);
 
       // Transform the result to match expected format
@@ -71,7 +71,7 @@ export default async function handler(req, res) {
       }
 
       const result = await query(`
-        INSERT INTO participants (first_name, last_name, username, telegram_id, revenue, grade_id)
+        INSERT INTO "Participant" ("firstName", "lastName", username, "telegramId", revenue, "gradeId")
         VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING *
       `, [firstName, lastName, username, telegramId, revenue, gradeId]);
@@ -79,25 +79,25 @@ export default async function handler(req, res) {
       const newParticipant = result.rows[0];
       
       // Get grade information
-      const gradeResult = await query('SELECT * FROM grades WHERE id = $1', [gradeId]);
+      const gradeResult = await query('SELECT * FROM "Grade" WHERE id = $1', [gradeId]);
       const grade = gradeResult.rows[0];
 
       const response = {
         id: newParticipant.id.toString(),
-        firstName: newParticipant.first_name,
-        lastName: newParticipant.last_name,
+        firstName: newParticipant.firstName,
+        lastName: newParticipant.lastName,
         username: newParticipant.username,
-        telegramId: newParticipant.telegram_id,
-        isActive: newParticipant.is_active,
+        telegramId: newParticipant.telegramId,
+        isActive: newParticipant.isActive,
         revenue: newParticipant.revenue,
-        joinDate: newParticipant.join_date,
-        gradeId: newParticipant.grade_id?.toString(),
-        warningStatus: newParticipant.warning_status,
-        warningCount: newParticipant.warning_count,
-        warningPeriodsLeft: newParticipant.warning_periods_left,
-        warningLastDate: newParticipant.warning_last_date,
-        createdAt: newParticipant.created_at,
-        updatedAt: newParticipant.updated_at,
+        joinDate: newParticipant.joinDate,
+        gradeId: newParticipant.gradeId?.toString(),
+        warningStatus: newParticipant.warningStatus,
+        warningCount: newParticipant.warningCount,
+        warningPeriodsLeft: newParticipant.warningPeriodsLeft,
+        warningLastDate: newParticipant.warningLastDate,
+        createdAt: newParticipant.createdAt,
+        updatedAt: newParticipant.updatedAt,
         grade: grade ? {
           id: grade.id.toString(),
           name: grade.name,

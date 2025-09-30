@@ -18,7 +18,7 @@ export default async function handler(req, res) {
 
     // Check user in database
     const result = await query(
-      'SELECT id, email, password, name, role FROM users WHERE email = $1',
+      'SELECT id, email, password, name, role FROM "User" WHERE email = $1',
       [email]
     );
 

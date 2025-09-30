@@ -16,19 +16,19 @@ export default async function handler(req, res) {
           g.name,
           g.description,
           g.plan,
-          g.min_revenue as "minRevenue",
-          g.max_revenue as "maxRevenue",
-          g.performance_levels as "performanceLevels",
+          g."minRevenue" as "minRevenue",
+          g."maxRevenue" as "maxRevenue",
+          g."performanceLevels" as "performanceLevels",
           g.color,
-          g.order_num as "order",
-          g.is_active as "isActive",
-          g.created_at as "createdAt",
-          g.updated_at as "updatedAt",
+          g."order" as "order",
+          g."isActive" as "isActive",
+          g."createdAt" as "createdAt",
+          g."updatedAt" as "updatedAt",
           COUNT(p.id) as participant_count
-        FROM grades g
-        LEFT JOIN participants p ON g.id = p.grade_id AND p.is_active = true
+        FROM "Grade" g
+        LEFT JOIN "Participant" p ON g.id = p."gradeId" AND p."isActive" = true
         WHERE g.id = $1
-        GROUP BY g.id
+        GROUP BY g.id, g.name, g.description, g.plan, g."minRevenue", g."maxRevenue", g."performanceLevels", g.color, g."order", g."isActive", g."createdAt", g."updatedAt"
       `, [id]);
 
       if (result.rows.length === 0) {
@@ -60,7 +60,7 @@ export default async function handler(req, res) {
       const { name, description, plan, minRevenue, maxRevenue, performanceLevels, color, order } = req.body;
       
       // Check if grade exists
-      const existingGrade = await query('SELECT * FROM grades WHERE id = $1', [id]);
+      const existingGrade = await query('SELECT * FROM "Grade" WHERE id = $1', [id]);
       if (existingGrade.rows.length === 0) {
         return res.status(404).json({ message: `Grade with ID ${id} not found` });
       }
@@ -86,17 +86,17 @@ export default async function handler(req, res) {
         paramCount++;
       }
       if (minRevenue !== undefined) {
-        updates.push(`min_revenue = $${paramCount}`);
+        updates.push(`"minRevenue" = $${paramCount}`);
         values.push(minRevenue);
         paramCount++;
       }
       if (maxRevenue !== undefined) {
-        updates.push(`max_revenue = $${paramCount}`);
+        updates.push(`"maxRevenue" = $${paramCount}`);
         values.push(maxRevenue);
         paramCount++;
       }
       if (performanceLevels !== undefined) {
-        updates.push(`performance_levels = $${paramCount}`);
+        updates.push(`"performanceLevels" = $${paramCount}`);
         values.push(JSON.stringify(performanceLevels));
         paramCount++;
       }
@@ -106,7 +106,7 @@ export default async function handler(req, res) {
         paramCount++;
       }
       if (order !== undefined) {
-        updates.push(`order_num = $${paramCount}`);
+        updates.push(`"order" = $${paramCount}`);
         values.push(order);
         paramCount++;
       }
@@ -115,11 +115,11 @@ export default async function handler(req, res) {
         return res.status(400).json({ message: 'No fields to update' });
       }
 
-      updates.push(`updated_at = CURRENT_TIMESTAMP`);
+      updates.push(`"updatedAt" = CURRENT_TIMESTAMP`);
       values.push(id);
 
       const updateQuery = `
-        UPDATE grades 
+        UPDATE "Grade" 
         SET ${updates.join(', ')}
         WHERE id = $${paramCount}
         RETURNING *
@@ -130,7 +130,7 @@ export default async function handler(req, res) {
       
       // Get participant count
       const countResult = await query(
-        'SELECT COUNT(*) as participant_count FROM participants WHERE grade_id = $1 AND is_active = true',
+        'SELECT COUNT(*) as participant_count FROM "Participant" WHERE "gradeId" = $1 AND "isActive" = true',
         [id]
       );
       
@@ -139,14 +139,14 @@ export default async function handler(req, res) {
         name: updatedGrade.name,
         description: updatedGrade.description,
         plan: updatedGrade.plan,
-        minRevenue: updatedGrade.min_revenue,
-        maxRevenue: updatedGrade.max_revenue,
-        performanceLevels: updatedGrade.performance_levels,
+        minRevenue: updatedGrade.minRevenue,
+        maxRevenue: updatedGrade.maxRevenue,
+        performanceLevels: updatedGrade.performanceLevels,
         color: updatedGrade.color,
-        order: updatedGrade.order_num,
-        isActive: updatedGrade.is_active,
-        createdAt: updatedGrade.created_at,
-        updatedAt: updatedGrade.updated_at,
+        order: updatedGrade.order,
+        isActive: updatedGrade.isActive,
+        createdAt: updatedGrade.createdAt,
+        updatedAt: updatedGrade.updatedAt,
         _count: { participants: parseInt(countResult.rows[0].participant_count) }
       };
 
@@ -157,14 +157,14 @@ export default async function handler(req, res) {
       // Delete grade
       
       // Check if grade exists
-      const existingGrade = await query('SELECT * FROM grades WHERE id = $1', [id]);
+      const existingGrade = await query('SELECT * FROM "Grade" WHERE id = $1', [id]);
       if (existingGrade.rows.length === 0) {
         return res.status(404).json({ message: `Grade with ID ${id} not found` });
       }
 
       // Check if grade has participants
       const participantCount = await query(
-        'SELECT COUNT(*) as count FROM participants WHERE grade_id = $1',
+        'SELECT COUNT(*) as count FROM "Participant" WHERE "gradeId" = $1',
         [id]
       );
       
@@ -175,7 +175,7 @@ export default async function handler(req, res) {
       }
 
       // Delete the grade
-      const result = await query('DELETE FROM grades WHERE id = $1 RETURNING *', [id]);
+      const result = await query('DELETE FROM "Grade" WHERE id = $1 RETURNING *', [id]);
       const deletedGrade = result.rows[0];
       
       const response = {
@@ -183,14 +183,14 @@ export default async function handler(req, res) {
         name: deletedGrade.name,
         description: deletedGrade.description,
         plan: deletedGrade.plan,
-        minRevenue: deletedGrade.min_revenue,
-        maxRevenue: deletedGrade.max_revenue,
-        performanceLevels: deletedGrade.performance_levels,
+        minRevenue: deletedGrade.minRevenue,
+        maxRevenue: deletedGrade.maxRevenue,
+        performanceLevels: deletedGrade.performanceLevels,
         color: deletedGrade.color,
-        order: deletedGrade.order_num,
-        isActive: deletedGrade.is_active,
-        createdAt: deletedGrade.created_at,
-        updatedAt: deletedGrade.updated_at,
+        order: deletedGrade.order,
+        isActive: deletedGrade.isActive,
+        createdAt: deletedGrade.createdAt,
+        updatedAt: deletedGrade.updatedAt,
         _count: { participants: 0 }
       };
 

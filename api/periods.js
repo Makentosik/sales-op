@@ -12,15 +12,15 @@ export default async function handler(req, res) {
         SELECT 
           id,
           name,
-          start_date as "startDate",
-          end_date as "endDate",
+          "startDate" as "startDate",
+          "endDate" as "endDate",
           type,
           status,
-          participant_snapshots as "participantSnapshots",
-          created_at as "createdAt",
-          updated_at as "updatedAt"
-        FROM periods
-        ORDER BY created_at DESC
+          "participantSnapshots" as "participantSnapshots",
+          "createdAt" as "createdAt",
+          "updatedAt" as "updatedAt"
+        FROM "Period"
+        ORDER BY "createdAt" DESC
       `);
 
       // Transform the result to match expected format
@@ -53,7 +53,7 @@ export default async function handler(req, res) {
       }
 
       const result = await query(`
-        INSERT INTO periods (name, start_date, end_date, type)
+        INSERT INTO "Period" (name, "startDate", "endDate", type)
         VALUES ($1, $2, $3, $4)
         RETURNING *
       `, [name, startDate, endDate, type]);
@@ -63,13 +63,13 @@ export default async function handler(req, res) {
       const response = {
         id: newPeriod.id.toString(),
         name: newPeriod.name,
-        startDate: newPeriod.start_date,
-        endDate: newPeriod.end_date,
+        startDate: newPeriod.startDate,
+        endDate: newPeriod.endDate,
         type: newPeriod.type,
         status: newPeriod.status,
-        participantSnapshots: newPeriod.participant_snapshots,
-        createdAt: newPeriod.created_at,
-        updatedAt: newPeriod.updated_at,
+        participantSnapshots: newPeriod.participantSnapshots,
+        createdAt: newPeriod.createdAt,
+        updatedAt: newPeriod.updatedAt,
         _count: {
           payments: 0
         }

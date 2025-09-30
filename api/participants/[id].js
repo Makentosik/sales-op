@@ -17,26 +17,26 @@ export default async function handler(req, res) {
       const result = await query(`
         SELECT 
           p.id,
-          p.first_name as "firstName",
-          p.last_name as "lastName",
+          p."firstName" as "firstName",
+          p."lastName" as "lastName",
           p.username,
-          p.telegram_id as "telegramId",
-          p.is_active as "isActive",
+          p."telegramId" as "telegramId",
+          p."isActive" as "isActive",
           p.revenue,
-          p.join_date as "joinDate",
-          p.grade_id as "gradeId",
-          p.warning_status as "warningStatus",
-          p.warning_count as "warningCount",
-          p.warning_periods_left as "warningPeriodsLeft",
-          p.warning_last_date as "warningLastDate",
-          p.created_at as "createdAt",
-          p.updated_at as "updatedAt",
+          p."joinDate" as "joinDate",
+          p."gradeId" as "gradeId",
+          p."warningStatus" as "warningStatus",
+          p."warningCount" as "warningCount",
+          p."warningPeriodsLeft" as "warningPeriodsLeft",
+          p."warningLastDate" as "warningLastDate",
+          p."createdAt" as "createdAt",
+          p."updatedAt" as "updatedAt",
           g.id as "grade.id",
           g.name as "grade.name",
           g.plan as "grade.plan",
           g.color as "grade.color"
-        FROM participants p
-        LEFT JOIN grades g ON p.grade_id = g.id
+        FROM "Participant" p
+        LEFT JOIN "Grade" g ON p."gradeId" = g.id
         WHERE p.id = $1
       `, [id]);
 
@@ -78,7 +78,7 @@ export default async function handler(req, res) {
 
       // If gradeId provided, ensure grade exists
       if (gradeId !== undefined) {
-        const gradeCheck = await query('SELECT id FROM grades WHERE id = $1', [gradeId]);
+        const gradeCheck = await query('SELECT id FROM "Grade" WHERE id = $1', [gradeId]);
         if (gradeCheck.rows.length === 0) {
           return res.status(400).json({ message: `Grade with ID ${gradeId} does not exist` });
         }
@@ -88,26 +88,26 @@ export default async function handler(req, res) {
       const values = [];
       let param = 1;
 
-      if (firstName !== undefined) { updates.push(`first_name = $${param++}`); values.push(firstName); }
-      if (lastName !== undefined) { updates.push(`last_name = $${param++}`); values.push(lastName); }
+      if (firstName !== undefined) { updates.push(`"firstName" = $${param++}`); values.push(firstName); }
+      if (lastName !== undefined) { updates.push(`"lastName" = $${param++}`); values.push(lastName); }
       if (username !== undefined) { updates.push(`username = $${param++}`); values.push(username); }
-      if (telegramId !== undefined) { updates.push(`telegram_id = $${param++}`); values.push(telegramId); }
-      if (isActive !== undefined) { updates.push(`is_active = $${param++}`); values.push(!!isActive); }
+      if (telegramId !== undefined) { updates.push(`"telegramId" = $${param++}`); values.push(telegramId); }
+      if (isActive !== undefined) { updates.push(`"isActive" = $${param++}`); values.push(!!isActive); }
       if (revenue !== undefined) { updates.push(`revenue = $${param++}`); values.push(revenue); }
-      if (gradeId !== undefined) { updates.push(`grade_id = $${param++}`); values.push(gradeId); }
-      if (warningStatus !== undefined) { updates.push(`warning_status = $${param++}`); values.push(warningStatus); }
+      if (gradeId !== undefined) { updates.push(`"gradeId" = $${param++}`); values.push(gradeId); }
+      if (warningStatus !== undefined) { updates.push(`"warningStatus" = $${param++}`); values.push(warningStatus); }
 
       if (updates.length === 0) {
         return res.status(400).json({ message: 'No fields to update' });
       }
 
-      updates.push('updated_at = CURRENT_TIMESTAMP');
+      updates.push('"updatedAt" = CURRENT_TIMESTAMP');
 
-      const updateSql = `UPDATE participants SET ${updates.join(', ')} WHERE id = $${param} RETURNING *`;
+      const updateSql = `UPDATE "Participant" SET ${updates.join(', ')} WHERE id = $${param} RETURNING *`;
       values.push(id);
 
       // Ensure participant exists
-      const exists = await query('SELECT id FROM participants WHERE id = $1', [id]);
+      const exists = await query('SELECT id FROM "Participant" WHERE id = $1', [id]);
       if (exists.rows.length === 0) {
         return res.status(404).json({ message: `Participant with ID ${id} not found` });
       }
@@ -117,8 +117,8 @@ export default async function handler(req, res) {
 
       // Fetch grade info
       let grade = null;
-      if (updated.grade_id) {
-        const gr = await query('SELECT * FROM grades WHERE id = $1', [updated.grade_id]);
+      if (updated.gradeId) {
+        const gr = await query('SELECT * FROM "Grade" WHERE id = $1', [updated.gradeId]);
         if (gr.rows[0]) {
           grade = {
             id: gr.rows[0].id.toString(),
@@ -131,20 +131,20 @@ export default async function handler(req, res) {
 
       const response = {
         id: updated.id.toString(),
-        firstName: updated.first_name,
-        lastName: updated.last_name,
+        firstName: updated.firstName,
+        lastName: updated.lastName,
         username: updated.username,
-        telegramId: updated.telegram_id,
-        isActive: updated.is_active,
+        telegramId: updated.telegramId,
+        isActive: updated.isActive,
         revenue: updated.revenue,
-        joinDate: updated.join_date,
-        gradeId: updated.grade_id?.toString(),
-        warningStatus: updated.warning_status,
-        warningCount: updated.warning_count,
-        warningPeriodsLeft: updated.warning_periods_left,
-        warningLastDate: updated.warning_last_date,
-        createdAt: updated.created_at,
-        updatedAt: updated.updated_at,
+        joinDate: updated.joinDate,
+        gradeId: updated.gradeId?.toString(),
+        warningStatus: updated.warningStatus,
+        warningCount: updated.warningCount,
+        warningPeriodsLeft: updated.warningPeriodsLeft,
+        warningLastDate: updated.warningLastDate,
+        createdAt: updated.createdAt,
+        updatedAt: updated.updatedAt,
         grade
       };
 
@@ -153,12 +153,12 @@ export default async function handler(req, res) {
 
     if (req.method === 'DELETE') {
       // Ensure participant exists
-      const exists = await query('SELECT id FROM participants WHERE id = $1', [id]);
+      const exists = await query('SELECT id FROM "Participant" WHERE id = $1', [id]);
       if (exists.rows.length === 0) {
         return res.status(404).json({ message: `Participant with ID ${id} not found` });
       }
 
-      const result = await query('DELETE FROM participants WHERE id = $1 RETURNING *', [id]);
+      const result = await query('DELETE FROM "Participant" WHERE id = $1 RETURNING *', [id]);
       const deleted = result.rows[0];
 
       return res.status(200).json({ id: deleted.id.toString() });
