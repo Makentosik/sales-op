@@ -1,105 +1,60 @@
-const mockGrades = [
-  {
-    id: '1',
-    name: 'Platinum Elite',
-    description: 'Высший уровень для топ-менеджеров',
-    plan: 1000000,
-    minRevenue: 800000,
-    maxRevenue: null,
-    performanceLevels: {
-      excellent: 1200000,
-      good: 1000000,
-      acceptable: 800000
-    },
-    color: '#FFD700',
-    order: 0,
-    isActive: true,
-    createdAt: '2024-01-01T10:00:00.000Z',
-    updatedAt: '2024-01-01T10:00:00.000Z',
-    _count: { participants: 0 }
-  },
-  {
-    id: '2',
-    name: 'Gold Premium',
-    description: 'Продвинутый уровень для опытных менеджеров',
-    plan: 800000,
-    minRevenue: 600000,
-    maxRevenue: 799999,
-    performanceLevels: {
-      excellent: 1000000,
-      good: 800000,
-      acceptable: 600000
-    },
-    color: '#FFA500',
-    order: 1,
-    isActive: true,
-    createdAt: '2024-01-01T10:00:00.000Z',
-    updatedAt: '2024-01-01T10:00:00.000Z',
-    _count: { participants: 0 }
-  },
-  {
-    id: '3',
-    name: 'Silver Standard',
-    description: 'Стандартный уровень для менеджеров среднего звена',
-    plan: 500000,
-    minRevenue: 400000,
-    maxRevenue: 599999,
-    performanceLevels: {
-      excellent: 700000,
-      good: 500000,
-      acceptable: 400000
-    },
-    color: '#C0C0C0',
-    order: 2,
-    isActive: true,
-    createdAt: '2024-01-01T10:00:00.000Z',
-    updatedAt: '2024-01-01T10:00:00.000Z',
-    _count: { participants: 0 }
-  },
-  {
-    id: '4',
-    name: 'Bronze Basic',
-    description: 'Базовый уровень для новых менеджеров',
-    plan: 300000,
-    minRevenue: 200000,
-    maxRevenue: 399999,
-    performanceLevels: {
-      excellent: 450000,
-      good: 300000,
-      acceptable: 200000
-    },
-    color: '#CD7F32',
-    order: 3,
-    isActive: true,
-    createdAt: '2024-01-01T10:00:00.000Z',
-    updatedAt: '2024-01-01T10:00:00.000Z',
-    _count: { participants: 0 }
-  },
-  {
-    id: '5',
-    name: 'Trainee',
-    description: 'Стажерский уровень для новичков',
-    plan: 150000,
-    minRevenue: 0,
-    maxRevenue: 199999,
-    performanceLevels: {
-      excellent: 250000,
-      good: 150000,
-      acceptable: 100000
-    },
-    color: '#808080',
-    order: 4,
-    isActive: true,
-    createdAt: '2024-01-01T10:00:00.000Z',
-    updatedAt: '2024-01-01T10:00:00.000Z',
-    _count: { participants: 0 }
-  }
-];
+import { query, initDB, seedData } from './lib/db.js';
 
-export default function handler(req, res) {
-  if (req.method === 'GET') {
-    return res.status(200).json(mockGrades);
-  }
+export default async function handler(req, res) {
+  try {
+    // Initialize DB on first request
+    await initDB();
+    await seedData();
 
-  return res.status(405).json({ message: 'Method not allowed' });
+    if (req.method === 'GET') {
+      // Get all grades with participant count
+      const gradesResult = await query(`
+        SELECT 
+          g.id,
+          g.name,
+          g.description,
+          g.plan,
+          g.min_revenue as "minRevenue",
+          g.max_revenue as "maxRevenue",
+          g.performance_levels as "performanceLevels",
+          g.color,
+          g.order_num as "order",
+          g.is_active as "isActive",
+          g.created_at as "createdAt",
+          g.updated_at as "updatedAt",
+          COUNT(p.id) as participant_count
+        FROM grades g
+        LEFT JOIN participants p ON g.id = p.grade_id AND p.is_active = true
+        GROUP BY g.id
+        ORDER BY g.order_num ASC
+      `);
+
+      // Transform the result to match expected format
+      const grades = gradesResult.rows.map(row => ({
+        id: row.id.toString(),
+        name: row.name,
+        description: row.description,
+        plan: row.plan,
+        minRevenue: row.minRevenue,
+        maxRevenue: row.maxRevenue,
+        performanceLevels: row.performanceLevels,
+        color: row.color,
+        order: row.order,
+        isActive: row.isActive,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+        _count: { participants: parseInt(row.participant_count) }
+      }));
+
+      return res.status(200).json(grades);
+    }
+
+    return res.status(405).json({ message: 'Method not allowed' });
+  } catch (error) {
+    console.error('Database error:', error);
+    return res.status(500).json({ 
+      message: 'Internal server error',
+      error: error.message 
+    });
+  }
 }
