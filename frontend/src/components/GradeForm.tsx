@@ -6,7 +6,6 @@ import {
   DialogActions,
   TextField,
   Button,
-  Grid,
   FormControlLabel,
   Switch,
   Box,
@@ -15,6 +14,7 @@ import {
   InputAdornment,
   Paper,
 } from '@mui/material';
+import Grid2 from '@mui/material/Grid2';
 // Определяем все интерфейсы локально
 
 // Подуровень выполнения для каждого грейда
@@ -257,8 +257,8 @@ const GradeForm: React.FC<GradeFormProps> = ({
       </DialogTitle>
       <form onSubmit={handleSubmit}>
         <DialogContent>
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={6} component="div">
+          <Grid2 container spacing={3}>
+            <Grid2 size={{ xs: 12, md: 6 }}>
               <TextField
                 fullWidth
                 label="Название"
@@ -268,8 +268,8 @@ const GradeForm: React.FC<GradeFormProps> = ({
                 helperText={errors.name}
                 required
               />
-            </Grid>
-            <Grid item xs={12} md={6} component="div">
+            </Grid2>
+            <Grid2 size=\{\{ xs: {12, md: 6}}\}>
               <TextField
                 fullWidth
                 label="Описание"
@@ -278,9 +278,9 @@ const GradeForm: React.FC<GradeFormProps> = ({
                 multiline
                 rows={2}
               />
-            </Grid>
+            </Grid2>
             
-            <Grid item xs={12} component="div">
+            <Grid2 size=\{\{ xs: {12}}\}>
               <TextField
                 fullWidth
                 label="План"
@@ -295,9 +295,9 @@ const GradeForm: React.FC<GradeFormProps> = ({
                 required
                 sx={{ mb: 3 }}
               />
-            </Grid>
+            </Grid2>
 
-            <Grid item xs={12} component="div">
+            <Grid2 size=\{\{ xs: {12}}\}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Box>
                   <Typography variant="h6" color="primary" gutterBottom>
@@ -336,8 +336,8 @@ const GradeForm: React.FC<GradeFormProps> = ({
                     🏆 {level.completionPercentage}% выполнения
                   </Typography>
                   
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} md={2.4} component="div">
+                  <Grid2 container spacing={2}>
+                    <Grid2 size=\{\{ xs: {12, md: 2.4}}\}>
                       <TextField
                         fullWidth
                         label="Выручка"
@@ -349,9 +349,9 @@ const GradeForm: React.FC<GradeFormProps> = ({
                         }}
                         size="small"
                       />
-                    </Grid>
+                    </Grid2>
                     
-                    <Grid item xs={12} md={2.4} component="div">
+                    <Grid2 size=\{\{ xs: {12, md: 2.4}}\}>
                       <TextField
                         fullWidth
                         label="% Премии"
@@ -364,9 +364,9 @@ const GradeForm: React.FC<GradeFormProps> = ({
                         inputProps={{ step: 0.01, min: 0, max: 100 }}
                         size="small"
                       />
-                    </Grid>
+                    </Grid2>
                     
-                    <Grid item xs={12} md={2.4} component="div">
+                    <Grid2 size=\{\{ xs: {12, md: 2.4}}\}>
                       <TextField
                         fullWidth
                         label="Премия"
@@ -378,9 +378,9 @@ const GradeForm: React.FC<GradeFormProps> = ({
                         }}
                         size="small"
                       />
-                    </Grid>
+                    </Grid2>
                     
-                    <Grid item xs={12} md={2.4} component="div">
+                    <Grid2 size=\{\{ xs: {12, md: 2.4}}\}>
                       <TextField
                         fullWidth
                         label="Оклад"
@@ -392,9 +392,9 @@ const GradeForm: React.FC<GradeFormProps> = ({
                         }}
                         size="small"
                       />
-                    </Grid>
+                    </Grid2>
                     
-                    <Grid item xs={12} md={2.4} component="div">
+                    <Grid2 size=\{\{ xs: {12, md: 2.4}}\}>
                       <TextField
                         fullWidth
                         label="Всего ЗП"
@@ -413,8 +413,8 @@ const GradeForm: React.FC<GradeFormProps> = ({
                           }
                         }}
                       />
-                    </Grid>
-                  </Grid>
+                    </Grid2>
+                  </Grid2>
                 </Paper>
               ))}
               
@@ -423,15 +423,15 @@ const GradeForm: React.FC<GradeFormProps> = ({
                   {errors.performanceLevels}
                 </Typography>
               )}
-            </Grid>
+            </Grid2>
 
-            <Grid item xs={12} component="div">
+            <Grid2 size=\{\{ xs: {12}}\}>
               <Typography variant="h6" color="primary" gutterBottom>
                 📊 Диапазон выручки
               </Typography>
-            </Grid>
+            </Grid2>
 
-            <Grid item xs={12} md={6} component="div">
+            <Grid2 size=\{\{ xs: {12, md: 6}}\}>
               <TextField
                 fullWidth
                 label="Минимальная выручка"
@@ -445,9 +445,9 @@ const GradeForm: React.FC<GradeFormProps> = ({
                 }}
                 required
               />
-            </Grid>
+            </Grid2>
 
-            <Grid item xs={12} md={6} component="div">
+            <Grid2 size=\{\{ xs: {12, md: 6}}\}>
               <TextField
                 fullWidth
                 label="Максимальная выручка"
@@ -461,15 +461,15 @@ const GradeForm: React.FC<GradeFormProps> = ({
                 }}
                 required
               />
-            </Grid>
+            </Grid2>
 
-            <Grid item xs={12} component="div">
+            <Grid2 size=\{\{ xs: {12}}\}>
               <Typography variant="h6" color="primary" gutterBottom>
                 🎨 Настройки отображения
               </Typography>
-            </Grid>
+            </Grid2>
 
-            <Grid item xs={12} md={4} component="div">
+            <Grid2 size=\{\{ xs: {12, md: 4}}\}>
               <TextField
                 fullWidth
                 label="Цвет"
@@ -478,9 +478,9 @@ const GradeForm: React.FC<GradeFormProps> = ({
                 onChange={handleChange('color')}
                 InputLabelProps={{ shrink: true }}
               />
-            </Grid>
+            </Grid2>
 
-            <Grid item xs={12} md={4} component="div">
+            <Grid2 size=\{\{ xs: {12, md: 4}}\}>
               <TextField
                 fullWidth
                 label="Порядок"
@@ -489,10 +489,10 @@ const GradeForm: React.FC<GradeFormProps> = ({
                 onChange={handleChange('order')}
                 inputProps={{ min: 0 }}
               />
-            </Grid>
+            </Grid2>
 
             {grade && (
-              <Grid item xs={12} md={4} component="div">
+              <Grid2 size=\{\{ xs: {12, md: 4}}\}>
                 <FormControlLabel
                   control={
                     <Switch
@@ -504,11 +504,11 @@ const GradeForm: React.FC<GradeFormProps> = ({
                   }
                   label="Активный"
                 />
-              </Grid>
+              </Grid2>
             )}
 
             {/* Предварительный просмотр */}
-            <Grid item xs={12} component="div">
+            <Grid2 size=\{\{ xs: {12}}\}>
               <Box
                 sx={{
                   p: 2,
@@ -532,8 +532,8 @@ const GradeForm: React.FC<GradeFormProps> = ({
                   ).join(' • ')}
                 </Typography>
               </Box>
-            </Grid>
-          </Grid>
+            </Grid2>
+          </Grid2>
 
           {Object.keys(errors).length > 0 && (
             <Alert severity="error" sx={{ mt: 2 }}>
@@ -559,3 +559,5 @@ const GradeForm: React.FC<GradeFormProps> = ({
 };
 
 export default GradeForm;
+
+
