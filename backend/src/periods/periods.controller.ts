@@ -9,7 +9,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { PeriodsService } from './periods.service';
+import { PeriodsService, Period } from './periods.service';
 import { CreatePeriodDto, UpdatePeriodDto, CompletePeriodDto } from './dto/period.dto';
 
 @Controller('periods')
@@ -17,22 +17,22 @@ export class PeriodsController {
   constructor(private readonly periodsService: PeriodsService) {}
 
   @Post()
-  create(@Body() createPeriodDto: CreatePeriodDto) {
+  create(@Body() createPeriodDto: CreatePeriodDto): Promise<Period> {
     return this.periodsService.create(createPeriodDto);
   }
 
   @Get()
-  findAll() {
+  findAll(): Promise<Period[]> {
     return this.periodsService.findAll();
   }
 
   @Get('current')
-  getCurrentPeriod() {
+  getCurrentPeriod(): any {
     return this.periodsService.getCurrentPeriod();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string): Promise<Period> {
     return this.periodsService.findOne(id);
   }
 
@@ -52,30 +52,30 @@ export class PeriodsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePeriodDto: UpdatePeriodDto) {
+  update(@Param('id') id: string, @Body() updatePeriodDto: UpdatePeriodDto): Promise<Period> {
     return this.periodsService.update(id, updatePeriodDto);
   }
 
   @Post(':id/activate')
   @HttpCode(HttpStatus.OK)
-  activate(@Param('id') id: string) {
+  activate(@Param('id') id: string): Promise<Period> {
     return this.periodsService.activate(id);
   }
 
   @Post(':id/complete')
   @HttpCode(HttpStatus.OK)
-  complete(@Param('id') id: string, @Body() completePeriodDto: CompletePeriodDto) {
+  complete(@Param('id') id: string, @Body() completePeriodDto: CompletePeriodDto): Promise<Period> {
     return this.periodsService.complete(id, completePeriodDto);
   }
 
   @Post(':id/cancel')
   @HttpCode(HttpStatus.OK)
-  cancel(@Param('id') id: string) {
+  cancel(@Param('id') id: string): Promise<Period> {
     return this.periodsService.cancel(id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: string): Promise<Period> {
     return this.periodsService.remove(id);
   }
 

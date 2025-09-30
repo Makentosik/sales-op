@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, ConflictException } from '@nestjs/common
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateGradeDto, UpdateGradeDto } from './dto/grade.dto';
 // Local interface instead of Prisma import
-interface Grade {
+export interface Grade {
   id: string;
   name: string;
   description?: string | null;

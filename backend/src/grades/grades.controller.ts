@@ -9,7 +9,7 @@ import {
   ValidationPipe,
   Query,
 } from '@nestjs/common';
-import { GradesService } from './grades.service';
+import { GradesService, Grade } from './grades.service';
 import { CreateGradeDto, UpdateGradeDto } from './dto/grade.dto';
 import { Public } from '../auth/public.decorator';
 
@@ -19,7 +19,7 @@ export class GradesController {
 
   @Get()
   @Public()
-  findAll() {
+  findAll(): Promise<Grade[]> {
     return this.gradesService.findAll();
   }
 
@@ -29,7 +29,7 @@ export class GradesController {
   }
 
   @Get('by-revenue')
-  getByRevenue(@Query('revenue') revenue: string) {
+  getByRevenue(@Query('revenue') revenue: string): Promise<Grade | null> {
     const revenueNumber = parseFloat(revenue);
     if (isNaN(revenueNumber)) {
       throw new Error('Revenue must be a valid number');
@@ -38,12 +38,12 @@ export class GradesController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string): Promise<Grade> {
     return this.gradesService.findOne(id);
   }
 
   @Post()
-  create(@Body(ValidationPipe) createGradeDto: CreateGradeDto) {
+  create(@Body(ValidationPipe) createGradeDto: CreateGradeDto): Promise<Grade> {
     return this.gradesService.create(createGradeDto);
   }
 
@@ -51,12 +51,12 @@ export class GradesController {
   update(
     @Param('id') id: string,
     @Body(ValidationPipe) updateGradeDto: UpdateGradeDto,
-  ) {
+  ): Promise<Grade> {
     return this.gradesService.update(id, updateGradeDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: string): Promise<Grade> {
     return this.gradesService.remove(id);
   }
 }

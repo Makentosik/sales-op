@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { GradeTransitionsService } from '../grade-transitions/grade-transitions.service';
 import { CreatePeriodDto, UpdatePeriodDto, CompletePeriodDto, PeriodStatus, PeriodType } from './dto/period.dto';
 // Local interface instead of Prisma import
-interface Period {
+export interface Period {
   id: string;
   name: string;
   startDate: Date;

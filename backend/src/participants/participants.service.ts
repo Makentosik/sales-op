@@ -4,10 +4,10 @@ import { CreateParticipantDto, UpdateParticipantDto } from './dto/participant.dt
 import { ImportParticipantDto } from './dto/import-participant.dto';
 import { FilterParticipantsDto, SortField, SortOrder, WarningStatusFilter } from './dto/filter-participants.dto';
 // Local interfaces instead of Prisma imports
-interface Participant {
+export interface Participant {
   id: string;
   firstName: string;
-  lastName: string;
+  lastName?: string | null;
   username?: string | null;
   telegramId: string;
   isActive: boolean;
@@ -15,7 +15,8 @@ interface Participant {
   joinDate?: Date | null;
   gradeId?: string | null;
   warningStatus?: string | null;
-  warningCount: number;
+  warningCount?: number;
+  warningPeriodsLeft?: number | null;
   warningLastDate?: Date | null;
   createdAt: Date;
   updatedAt: Date;

@@ -10,7 +10,7 @@ import {
   Query,
   ParseBoolPipe,
 } from '@nestjs/common';
-import { ParticipantsService } from './participants.service';
+import { ParticipantsService, Participant } from './participants.service';
 import { CreateParticipantDto, UpdateParticipantDto } from './dto/participant.dto';
 import { ImportParticipantDto, ImportParticipantsDto } from './dto/import-participant.dto';
 import { FilterParticipantsDto } from './dto/filter-participants.dto';
@@ -22,17 +22,17 @@ export class ParticipantsController {
 
   @Get()
   @Public()
-  findAll(@Query(ValidationPipe) filters: FilterParticipantsDto) {
+  findAll(@Query(ValidationPipe) filters: FilterParticipantsDto): Promise<Participant[]> {
     return this.participantsService.findAll(filters);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string): Promise<Participant> {
     return this.participantsService.findOne(id);
   }
 
   @Post()
-  create(@Body(ValidationPipe) createParticipantDto: CreateParticipantDto) {
+  create(@Body(ValidationPipe) createParticipantDto: CreateParticipantDto): Promise<Participant> {
     return this.participantsService.create(createParticipantDto);
   }
 
@@ -40,12 +40,12 @@ export class ParticipantsController {
   update(
     @Param('id') id: string,
     @Body(ValidationPipe) updateParticipantDto: UpdateParticipantDto,
-  ) {
+  ): Promise<Participant> {
     return this.participantsService.update(id, updateParticipantDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: string): Promise<Participant> {
     return this.participantsService.remove(id);
   }
 
