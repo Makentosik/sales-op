@@ -1,12 +1,55 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Participant, Grade, Period } from '@prisma/client';
 import { 
   GradePerformanceLevel, 
   ParticipantSalaryCalculation, 
   SalaryCalculationResponse,
   ParticipantSalaryDetailsResponse 
 } from './salary-calculator.types';
+
+// Локальные интерфейсы вместо Prisma типов
+interface Participant {
+  id: string;
+  telegramId: string;
+  username?: string | null;
+  firstName: string;
+  lastName?: string | null;
+  phoneNumber?: string | null;
+  revenue: number;
+  isActive: boolean;
+  joinedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  gradeId?: string | null;
+  userId?: string | null;
+}
+
+interface Grade {
+  id: string;
+  name: string;
+  description?: string | null;
+  plan: number;
+  minRevenue: number;
+  maxRevenue: number;
+  performanceLevels: any;
+  color: string;
+  order: number;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface Period {
+  id: string;
+  name: string;
+  startDate: Date;
+  endDate: Date;
+  type: string;
+  status: string;
+  participantSnapshots?: any;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 @Injectable()
 export class SalaryCalculatorService {

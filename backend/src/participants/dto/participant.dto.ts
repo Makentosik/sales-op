@@ -1,5 +1,10 @@
 import { IsString, IsOptional, IsNumber, IsBoolean, IsUUID, IsEnum } from 'class-validator';
-import { WarningStatus } from '@prisma/client';
+
+// Локальный enum вместо Prisma типа
+enum WarningStatus {
+  WARNING_90 = 'WARNING_90',
+  WARNING_80 = 'WARNING_80'
+}
 
 export class CreateParticipantDto {
   @IsString()

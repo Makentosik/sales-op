@@ -2,7 +2,24 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Participant, Grade, Period, TransitionType, WarningStatus, GradeTransition } from '@prisma/client';
 
-interface ParticipantWithGrade extends Participant {
+interface ParticipantWithGrade {
+  id: string;
+  telegramId: string;
+  username?: string | null;
+  firstName: string;
+  lastName?: string | null;
+  phoneNumber?: string | null;
+  revenue: number;
+  isActive: boolean;
+  joinedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  gradeId?: string | null;
+  warningStatus?: WarningStatus | null;
+  warningPeriodsLeft: number;
+  lastPeriodRevenue: number;
+  lastCompletionPercentage: number;
+  userId?: string | null;
   grade: Grade | null;
 }
 

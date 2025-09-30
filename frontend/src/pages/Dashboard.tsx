@@ -182,6 +182,14 @@ const Dashboard: React.FC = () => {
       color: '#e74c3c',
       route: '/salary-calculator',
       badge: '₽ 2.45M'
+    },
+    {
+      title: 'Системные логи',
+      description: 'Логи системы',
+      icon: <Assessment />,
+      color: '#8e44ad',
+      route: '/logs',
+      badge: '📝 Логи'
     }
   ];
 
