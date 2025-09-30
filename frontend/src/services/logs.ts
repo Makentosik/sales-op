@@ -1,15 +1,17 @@
-import { apiClient } from './api';
+import api from './api';
 
-export enum LogType {
-  PAYMENT = 'PAYMENT',
-  PARTICIPANT_JOIN = 'PARTICIPANT_JOIN',
-  PARTICIPANT_LEAVE = 'PARTICIPANT_LEAVE',
-  GRADE_CHANGE = 'GRADE_CHANGE',
-  PERIOD_START = 'PERIOD_START',
-  PERIOD_END = 'PERIOD_END',
-  SYSTEM = 'SYSTEM',
-  ERROR = 'ERROR',
-}
+export const LogType = {
+  PAYMENT: 'PAYMENT',
+  PARTICIPANT_JOIN: 'PARTICIPANT_JOIN',
+  PARTICIPANT_LEAVE: 'PARTICIPANT_LEAVE',
+  GRADE_CHANGE: 'GRADE_CHANGE',
+  PERIOD_START: 'PERIOD_START',
+  PERIOD_END: 'PERIOD_END',
+  SYSTEM: 'SYSTEM',
+  ERROR: 'ERROR',
+} as const;
+
+export type LogType = typeof LogType[keyof typeof LogType];
 
 export interface Log {
   id: string;
@@ -48,12 +50,12 @@ export const logsAPI = {
     const query = searchParams.toString();
     const url = query ? `/logs?${query}` : '/logs';
     
-    const response = await apiClient.get(url);
+    const response = await api.get(url);
     return response.data;
   },
 
   getRecent: async (limit: number = 20): Promise<Log[]> => {
-    const response = await apiClient.get(`/logs/recent?limit=${limit}`);
+    const response = await api.get(`/logs/recent?limit=${limit}`);
     return response.data;
   },
 };
