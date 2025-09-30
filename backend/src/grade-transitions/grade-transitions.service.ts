@@ -1,6 +1,62 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Participant, Grade, Period, TransitionType, WarningStatus, GradeTransition } from '@prisma/client';
+
+// Локальные типы вместо Prisma импортов
+enum TransitionType {
+  PROMOTION = 'PROMOTION',
+  DEMOTION = 'DEMOTION',
+  INITIAL = 'INITIAL'
+}
+
+enum WarningStatus {
+  WARNING_90 = 'WARNING_90',
+  WARNING_80 = 'WARNING_80'
+}
+
+interface Grade {
+  id: string;
+  name: string;
+  description?: string | null;
+  plan: number;
+  minRevenue: number;
+  maxRevenue: number;
+  performanceLevels: any;
+  color: string;
+  order: number;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface Participant {
+  id: string;
+  telegramId: string;
+  username?: string | null;
+  firstName: string;
+  lastName?: string | null;
+  phoneNumber?: string | null;
+  revenue: number;
+  isActive: boolean;
+  joinedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  gradeId?: string | null;
+  userId?: string | null;
+}
+
+interface GradeTransition {
+  id: string;
+  participantId: string;
+  fromGradeId?: string | null;
+  toGradeId: string;
+  periodId: string;
+  transitionType: TransitionType;
+  reason: string;
+  completionPercentage: number;
+  revenue: number;
+  details?: any;
+  createdAt: Date;
+}
 
 interface ParticipantWithGrade {
   id: string;
@@ -30,8 +86,8 @@ export class GradeTransitionsService {
   /**
    * Обработка переходов грейдов при завершении периода
    */
-  async processGradeTransitions(periodId: string): Promise<GradeTransition[]> {
-    const transitions: GradeTransition[] = [];
+  async processGradeTransitions(periodId: string): Promise<any[]> {
+    const transitions: any[] = [];
     
     // Получаем все грейды отсортированные по порядку
     const allGrades = await this.prisma.grade.findMany({
@@ -46,13 +102,15 @@ export class GradeTransitionsService {
     });
 
     for (const participant of participants) {
+      // Приводим типы к нашим локальным интерфейсам
+      const typedParticipant = participant as any as ParticipantWithGrade;
       const completionPercentage = participant.grade 
         ? (participant.revenue / participant.grade.plan) * 100 
         : 0;
 
       // Рассчитываем новый грейд
       const newGradeResult = await this.calculateNewGrade(
-        participant,
+        typedParticipant,
         allGrades,
         completionPercentage
       );
@@ -386,7 +444,7 @@ export class GradeTransitionsService {
     transitionType: TransitionType,
     reason: string,
     completionPercentage: number
-  ): Promise<GradeTransition> {
+  ): Promise<any> {
     return this.prisma.gradeTransition.create({
       data: {
         participantId: participant.id,
@@ -456,7 +514,7 @@ export class GradeTransitionsService {
   /**
    * Получает историю переходов для участника
    */
-  async getParticipantTransitions(participantId: string): Promise<GradeTransition[]> {
+  async getParticipantTransitions(participantId: string): Promise<any[]> {
     return this.prisma.gradeTransition.findMany({
       where: { participantId },
       include: {
