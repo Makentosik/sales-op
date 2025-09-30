@@ -151,7 +151,7 @@ const SalaryCalculator: React.FC = () => {
         {/* Управление периодом */}
         <Paper sx={{ p: 3, mb: 3 }}>
           <Grid container spacing={3} alignItems="center">
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12 as const} md={6 as const}>
               <FormControl fullWidth>
                 <InputLabel id="period-select">Выберите период</InputLabel>
                 <Select
@@ -171,7 +171,7 @@ const SalaryCalculator: React.FC = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12 as const} md={6 as const}>
               <Button
                 variant="contained"
                 startIcon={<CalculateIcon />}
@@ -191,7 +191,7 @@ const SalaryCalculator: React.FC = () => {
           <>
             {/* Сводная информация */}
             <Grid container spacing={3} sx={{ mb: 4 }}>
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12 as const} md={4 as const}>
                 <SummaryCard>
                   <CardContent>
                     <Typography color="textSecondary" gutterBottom variant="h6">
@@ -203,7 +203,7 @@ const SalaryCalculator: React.FC = () => {
                   </CardContent>
                 </SummaryCard>
               </Grid>
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12 as const} md={4 as const}>
                 <SummaryCard>
                   <CardContent>
                     <Typography color="textSecondary" gutterBottom variant="h6">
@@ -215,7 +215,7 @@ const SalaryCalculator: React.FC = () => {
                   </CardContent>
                 </SummaryCard>
               </Grid>
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12 as const} md={4 as const}>
                 <SummaryCard>
                   <CardContent>
                     <Typography color="textSecondary" gutterBottom variant="h6">
