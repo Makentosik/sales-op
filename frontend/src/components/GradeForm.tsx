@@ -13,8 +13,8 @@ import {
   Alert,
   InputAdornment,
   Paper,
+  Grid2,
 } from '@mui/material';
-import Grid2 from '@mui/material/Grid2';
 // Определяем все интерфейсы локально
 
 // Подуровень выполнения для каждого грейда
@@ -269,7 +269,7 @@ const GradeForm: React.FC<GradeFormProps> = ({
                 required
               />
             </Grid2>
-            <Grid2 size=\{\{ xs: {12, md: 6}}\}>
+            <Grid2 size={{ xs: 12, md: 6 }}>
               <TextField
                 fullWidth
                 label="Описание"
@@ -559,5 +559,6 @@ const GradeForm: React.FC<GradeFormProps> = ({
 };
 
 export default GradeForm;
+
 
 
