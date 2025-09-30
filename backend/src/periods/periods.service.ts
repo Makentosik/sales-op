@@ -2,7 +2,22 @@ import { Injectable, NotFoundException, ConflictException, BadRequestException }
 import { PrismaService } from '../prisma/prisma.service';
 import { GradeTransitionsService } from '../grade-transitions/grade-transitions.service';
 import { CreatePeriodDto, UpdatePeriodDto, CompletePeriodDto, PeriodStatus, PeriodType } from './dto/period.dto';
-import { Period } from '@prisma/client';
+// Local interface instead of Prisma import
+interface Period {
+  id: string;
+  name: string;
+  startDate: Date;
+  endDate: Date;
+  type: string;
+  status: string;
+  participantSnapshots?: any;
+  createdAt: Date;
+  updatedAt: Date;
+  _count?: any;
+  grades?: any[];
+  payments?: any[];
+  logs?: any[];
+}
 
 @Injectable()
 export class PeriodsService {

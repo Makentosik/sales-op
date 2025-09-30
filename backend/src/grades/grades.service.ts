@@ -1,7 +1,22 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateGradeDto, UpdateGradeDto } from './dto/grade.dto';
-import { Grade } from '@prisma/client';
+// Local interface instead of Prisma import
+interface Grade {
+  id: string;
+  name: string;
+  description?: string | null;
+  plan: number;
+  minRevenue?: number | null;
+  maxRevenue?: number | null;
+  performanceLevels: any;
+  color?: string | null;
+  order: number;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  _count?: { participants: number };
+}
 
 @Injectable()
 export class GradesService {

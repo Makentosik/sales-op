@@ -3,7 +3,28 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateParticipantDto, UpdateParticipantDto } from './dto/participant.dto';
 import { ImportParticipantDto } from './dto/import-participant.dto';
 import { FilterParticipantsDto, SortField, SortOrder, WarningStatusFilter } from './dto/filter-participants.dto';
-import { Participant, Prisma } from '@prisma/client';
+// Local interfaces instead of Prisma imports
+interface Participant {
+  id: string;
+  firstName: string;
+  lastName: string;
+  username?: string | null;
+  telegramId: string;
+  isActive: boolean;
+  revenue: number;
+  joinDate?: Date | null;
+  gradeId?: string | null;
+  warningStatus?: string | null;
+  warningCount: number;
+  warningLastDate?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+  grade?: any;
+}
+
+// Local type definitions
+type ParticipantWhereInput = any;
+type ParticipantOrderByWithRelationInput = any;
 
 @Injectable()
 export class ParticipantsService {
@@ -21,7 +42,7 @@ export class ParticipantsService {
     } = filters;
 
     // Строим условия WHERE
-    const where: Prisma.ParticipantWhereInput = {};
+    const where: ParticipantWhereInput = {};
 
     // Поиск по имени/фамилии (для SQLite без mode: 'insensitive')
     if (search) {
@@ -64,14 +85,14 @@ export class ParticipantsService {
     }
 
     // Определяем сортировку
-    let orderBy: Prisma.ParticipantOrderByWithRelationInput | Prisma.ParticipantOrderByWithRelationInput[] = {};
+    let orderBy: ParticipantOrderByWithRelationInput | ParticipantOrderByWithRelationInput[] = {};
     
     switch (sortBy) {
       case SortField.NAME:
         orderBy = [
           { firstName: sortOrder },
           { lastName: sortOrder }
-        ] as Prisma.ParticipantOrderByWithRelationInput[];
+        ] as ParticipantOrderByWithRelationInput[];
         break;
       case SortField.REVENUE:
         orderBy = { revenue: sortOrder };
