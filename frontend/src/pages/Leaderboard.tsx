@@ -17,7 +17,6 @@ import {
 } from '@mui/material';
 import {
   EmojiEvents as TrophyIcon,
-  AttachMoney as MoneyIcon,
   TrendingUp as TrendingUpIcon,
   Warning as WarningIcon,
   Dashboard as DashboardIcon,
@@ -86,7 +85,7 @@ const ParticipantRow = styled(Box)(({ theme }) => ({
   },
 }));
 
-const ProgressBar = styled(LinearProgress)(({ theme }) => ({
+const ProgressBar = styled(LinearProgress)(() => ({
   height: 24,
   borderRadius: 12,
   backgroundColor: 'rgba(0, 0, 0, 0.08)',
@@ -96,7 +95,7 @@ const ProgressBar = styled(LinearProgress)(({ theme }) => ({
   },
 }));
 
-const MoneyEmoji = styled(Box)(({ theme }) => ({
+const MoneyEmoji = styled(Box)(() => ({
   position: 'absolute',
   top: '-8px',
   fontSize: '24px',
@@ -130,7 +129,7 @@ const Leaderboard: React.FC = () => {
     try {
       setLoading(true);
       const [participants, grades] = await Promise.all([
-        participantsAPI.getAll(true),
+        participantsAPI.getAll({ isActive: true }),
         gradesAPI.getAll()
       ]);
 

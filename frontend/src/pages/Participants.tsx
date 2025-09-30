@@ -232,6 +232,16 @@ const Participants: React.FC = () => {
     }
   };
 
+  // ✅ Единый обработчик с юнион-параметром
+  const handleSubmit: (data: CreateParticipantDto | UpdateParticipantDto) => Promise<void> = async (data) => {
+    if (editingParticipant) {
+      // обновление
+      return handleUpdate(data as UpdateParticipantDto);
+    }
+    // создание
+    return handleCreate(data as CreateParticipantDto);
+  };
+
   const handleDelete = async () => {
     if (!participantToDelete) return;
     try {
@@ -471,7 +481,7 @@ const Participants: React.FC = () => {
       <ParticipantForm
         open={formOpen}
         onClose={() => setFormOpen(false)}
-        onSubmit={editingParticipant ? handleUpdate : handleCreate}
+        onSubmit={handleSubmit}
         participant={editingParticipant}
         loading={submitLoading}
       />

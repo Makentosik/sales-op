@@ -171,6 +171,16 @@ const Grades: React.FC = () => {
     }
   };
 
+  // ✅ Единый обработчик с юнион-параметром
+  const handleSubmit: (data: CreateGradeDto | UpdateGradeDto) => Promise<void> = async (data) => {
+    if (editingGrade) {
+      // обновление
+      return handleUpdateGrade(data as UpdateGradeDto);
+    }
+    // создание
+    return handleCreateGrade(data as CreateGradeDto);
+  };
+
   const handleDeleteGrade = async () => {
     if (!gradeToDelete) return;
 
@@ -370,7 +380,7 @@ const Grades: React.FC = () => {
           setFormOpen(false);
           setEditingGrade(null);
         }}
-        onSubmit={editingGrade ? handleUpdateGrade : handleCreateGrade}
+        onSubmit={handleSubmit}
         grade={editingGrade}
         loading={submitLoading}
       />

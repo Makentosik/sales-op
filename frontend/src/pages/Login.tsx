@@ -94,7 +94,7 @@ const LogoBox = styled(Box)(({ theme }) => ({
   },
 }));
 
-const StyledTextField = styled(TextField)(({ theme }) => ({
+const StyledTextField = styled(TextField)(() => ({
   '& .MuiOutlinedInput-root': {
     transition: 'all 0.3s ease',
     '&:hover': {
