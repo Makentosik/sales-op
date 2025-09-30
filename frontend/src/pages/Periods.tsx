@@ -142,6 +142,16 @@ const Periods: React.FC = () => {
     }
   };
 
+  // ✅ Единый обработчик с юнион-параметром
+  const handleSubmit: (data: CreatePeriodDto | UpdatePeriodDto) => Promise<void> = async (data) => {
+    if ('id' in data) {
+      // обновление
+      return handleUpdatePeriod(data as UpdatePeriodDto);
+    }
+    // создание
+    return handleCreatePeriod(data as CreatePeriodDto);
+  };
+
   const handleActivatePeriod = async (period: Period) => {
     try {
       setActionLoading(period.id);
@@ -465,7 +475,7 @@ const Periods: React.FC = () => {
             setFormOpen(false);
             setEditingPeriod(null);
           }}
-          onSubmit={editingPeriod ? handleUpdatePeriod : handleCreatePeriod}
+          onSubmit={handleSubmit}
           period={editingPeriod}
         />
 

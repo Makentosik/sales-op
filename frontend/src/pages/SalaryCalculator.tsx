@@ -21,8 +21,8 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Grid2,
 } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import {
   Calculate as CalculateIcon,
   AttachMoney as MoneyIcon,
@@ -148,8 +148,8 @@ const SalaryCalculator: React.FC = () => {
       <Container maxWidth="xl" sx={{ py: 4 }}>
         {/* Управление периодом */}
         <Paper sx={{ p: 3, mb: 3 }}>
-          <Grid2 container spacing={3} alignItems="center">
-            <Grid2 size={{ xs: 12, md: 6 }}>
+          <Grid container spacing={3} alignItems="center">
+            <Grid item xs={12} md={6}>
               <FormControl fullWidth>
                 <InputLabel id="period-select">Выберите период</InputLabel>
                 <Select
@@ -168,8 +168,8 @@ const SalaryCalculator: React.FC = () => {
                   ))}
                 </Select>
               </FormControl>
-            </Grid2>
-            <Grid2 size={{ xs: 12, md: 6 }}>
+            </Grid>
+            <Grid item xs={12} md={6}>
               <Button
                 variant="contained"
                 startIcon={<CalculateIcon />}
@@ -179,8 +179,8 @@ const SalaryCalculator: React.FC = () => {
               >
                 Рассчитать зарплаты
               </Button>
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
         </Paper>
 
         {loading && <LinearProgress sx={{ mb: 3 }} />}
@@ -188,8 +188,8 @@ const SalaryCalculator: React.FC = () => {
         {salaryData && (
           <>
             {/* Сводная информация */}
-            <Grid2 container spacing={3} sx={{ mb: 4 }}>
-              <Grid2 size={{ xs: 12, md: 4 }}>
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+              <Grid item xs={12} md={4}>
                 <SummaryCard>
                   <CardContent>
                     <Typography color="textSecondary" gutterBottom variant="h6">
@@ -200,8 +200,8 @@ const SalaryCalculator: React.FC = () => {
                     </Typography>
                   </CardContent>
                 </SummaryCard>
-              </Grid2>
-              <Grid2 size={{ xs: 12, md: 4 }}>
+              </Grid>
+              <Grid item xs={12} md={4}>
                 <SummaryCard>
                   <CardContent>
                     <Typography color="textSecondary" gutterBottom variant="h6">
@@ -212,8 +212,8 @@ const SalaryCalculator: React.FC = () => {
                     </Typography>
                   </CardContent>
                 </SummaryCard>
-              </Grid2>
-              <Grid2 size={{ xs: 12, md: 4 }}>
+              </Grid>
+              <Grid item xs={12} md={4}>
                 <SummaryCard>
                   <CardContent>
                     <Typography color="textSecondary" gutterBottom variant="h6">
@@ -224,8 +224,8 @@ const SalaryCalculator: React.FC = () => {
                     </Typography>
                   </CardContent>
                 </SummaryCard>
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
 
             {/* Таблица с расчетами */}
             <Paper elevation={0}>
