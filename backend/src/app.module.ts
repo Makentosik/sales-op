@@ -10,7 +10,6 @@ import { ParticipantsModule } from './participants/participants.module';
 import { PeriodsModule } from './periods/periods.module';
 import { GradeTransitionsModule } from './grade-transitions/grade-transitions.module';
 import { SalaryCalculatorModule } from './salary-calculator/salary-calculator.module';
-import { LogsModule } from './logs';
 
 @Module({
   imports: [
@@ -23,7 +22,6 @@ import { LogsModule } from './logs';
     PeriodsModule,
     GradeTransitionsModule,
     SalaryCalculatorModule,
-    LogsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

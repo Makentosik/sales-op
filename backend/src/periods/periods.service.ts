@@ -16,7 +16,6 @@ export interface Period {
   _count?: any;
   grades?: any[];
   payments?: any[];
-  logs?: any[];
 }
 
 @Injectable()
@@ -32,7 +31,6 @@ export class PeriodsService {
         _count: {
           select: {
             payments: true,
-            logs: true,
           },
         },
       },
@@ -54,11 +52,9 @@ export class PeriodsService {
             participant: true,
           },
         },
-        logs: true,
         _count: {
           select: {
             payments: true,
-            logs: true,
           },
         },
       },
@@ -103,20 +99,7 @@ export class PeriodsService {
         },
       });
 
-      // Создаем лог о создании периода
-      await this.prisma.log.create({
-        data: {
-          type: 'PERIOD_START',
-          message: `Период "${name}" создан`,
-          details: {
-            periodId: period.id,
-            type,
-            startDate,
-            endDate,
-          },
-          periodId: period.id,
-        },
-      });
+      // Log creation removed
 
       return period;
     } catch (error) {
@@ -206,44 +189,7 @@ export class PeriodsService {
       },
     });
 
-    // Создаем лог о завершении периода с информацией о переходах
-    await this.prisma.log.create({
-      data: {
-        type: 'PERIOD_END',
-        message: `Период "${period.name}" завершен`,
-        details: {
-          periodId: id,
-          participantCount: participantSnapshots ? (participantSnapshots as any[]).length : 0,
-          gradeTransitionsCount: gradeTransitions.length,
-          completedAt: new Date().toISOString(),
-          transitions: gradeTransitions.map(t => ({
-            participantId: t.participantId,
-            type: t.transitionType,
-            reason: t.reason,
-            completionPercentage: t.completionPercentage
-          }))
-        },
-        periodId: id,
-      },
-    });
-
-    // Создаем отдельные логи для каждого перехода
-    for (const transition of gradeTransitions) {
-      await this.prisma.log.create({
-        data: {
-          type: 'GRADE_CHANGE',
-          message: `Переход грейда: ${transition.reason}`,
-          details: {
-            transitionId: transition.id,
-            transitionType: transition.transitionType,
-            completionPercentage: transition.completionPercentage,
-            revenue: transition.revenue
-          },
-          participantId: transition.participantId,
-          periodId: id,
-        },
-      });
-    }
+    // Log creation removed
 
     return completedPeriod;
   }
