@@ -280,7 +280,7 @@ const GradeForm: React.FC<GradeFormProps> = ({
               />
             </Grid2>
             
-            <Grid2 size=\{\{ xs: {12}}\}>
+            <Grid2 size={{ xs: 12 }}>
               <TextField
                 fullWidth
                 label="План"
@@ -297,7 +297,7 @@ const GradeForm: React.FC<GradeFormProps> = ({
               />
             </Grid2>
 
-            <Grid2 size=\{\{ xs: {12}}\}>
+            <Grid2 size={{ xs: 12 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Box>
                   <Typography variant="h6" color="primary" gutterBottom>
@@ -559,6 +559,7 @@ const GradeForm: React.FC<GradeFormProps> = ({
 };
 
 export default GradeForm;
+
 
 
 
