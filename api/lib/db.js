@@ -100,9 +100,10 @@ export async function initDB() {
       )
     `);
 
-    // Create the legacy users table as a view for compatibility
+    // Drop existing legacy tables/views if they exist and create views for compatibility
+    await query(`DROP TABLE IF EXISTS users CASCADE`);
     await query(`
-      CREATE OR REPLACE VIEW users AS
+      CREATE VIEW users AS
       SELECT 
         ROW_NUMBER() OVER (ORDER BY "createdAt") as id,
         email,
@@ -132,9 +133,10 @@ export async function initDB() {
       )
     `);
 
-    // Create the legacy grades table as a view for compatibility
+    // Drop existing legacy tables/views and create views for compatibility
+    await query(`DROP TABLE IF EXISTS grades CASCADE`);
     await query(`
-      CREATE OR REPLACE VIEW grades AS
+      CREATE VIEW grades AS
       SELECT 
         ROW_NUMBER() OVER (ORDER BY "createdAt") as id,
         name,
@@ -162,12 +164,14 @@ export async function initDB() {
         "phoneNumber" TEXT,
         revenue DOUBLE PRECISION DEFAULT 0,
         "isActive" BOOLEAN DEFAULT true,
-        "joinedAt" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+        "joinDate" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
         "createdAt" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
         "updatedAt" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
         "gradeId" TEXT,
         "warningStatus" "WarningStatus",
+        "warningCount" INTEGER DEFAULT 0,
         "warningPeriodsLeft" INTEGER DEFAULT 0,
+        "warningLastDate" TIMESTAMP(3),
         "lastPeriodRevenue" DOUBLE PRECISION DEFAULT 0,
         "lastCompletionPercentage" DOUBLE PRECISION DEFAULT 0,
         "userId" TEXT,
@@ -176,9 +180,10 @@ export async function initDB() {
       )
     `);
 
-    // Create the legacy participants table as a view for compatibility
+    // Drop existing legacy tables/views and create views for compatibility
+    await query(`DROP TABLE IF EXISTS participants CASCADE`);
     await query(`
-      CREATE OR REPLACE VIEW participants AS
+      CREATE VIEW participants AS
       SELECT 
         ROW_NUMBER() OVER (ORDER BY "createdAt") as id,
         "firstName" as first_name,
@@ -187,12 +192,12 @@ export async function initDB() {
         "telegramId" as telegram_id,
         "isActive" as is_active,
         revenue,
-        "joinedAt" as join_date,
+        "joinDate" as join_date,
         (SELECT ROW_NUMBER() OVER (ORDER BY g."createdAt") FROM "Grade" g WHERE g.id = p."gradeId") as grade_id,
         "warningStatus"::TEXT as warning_status,
-        0 as warning_count, -- legacy field
+        "warningCount" as warning_count,
         "warningPeriodsLeft" as warning_periods_left,
-        NULL::TIMESTAMP as warning_last_date, -- legacy field
+        "warningLastDate" as warning_last_date
         "createdAt" as created_at,
         "updatedAt" as updated_at
       FROM "Participant" p
@@ -213,9 +218,10 @@ export async function initDB() {
       )
     `);
 
-    // Create the legacy periods table as a view for compatibility
+    // Drop existing legacy tables/views and create views for compatibility
+    await query(`DROP TABLE IF EXISTS periods CASCADE`);
     await query(`
-      CREATE OR REPLACE VIEW periods AS
+      CREATE VIEW periods AS
       SELECT 
         ROW_NUMBER() OVER (ORDER BY "createdAt") as id,
         name,
